@@ -993,7 +993,24 @@
       gap: 25px;
     }
     .v2-main > .topbar { align-items: center; gap: 20px; }
-    .v2-main .topbar-greeting { min-width: 180px; }
+    .v2-main .topbar-greeting {
+      display: flex;
+      min-width: 180px;
+      align-items: center;
+      gap: 13px;
+    }
+    .dashboard-logo {
+      display: block;
+      width: 48px;
+      height: 48px;
+      flex: 0 0 auto;
+      border: 1px solid rgba(var(--accent-rgb), .25);
+      border-radius: 50%;
+      background: #020408;
+      box-shadow: 0 0 18px rgba(170, 125, 255, .22);
+      object-fit: cover;
+    }
+    .topbar-copy { min-width: 0; }
     .v2-main .topbar-greeting h1 { font-size: 24px; letter-spacing: -0.04em; }
     .v2-main .topbar-greeting p { margin-top: 5px; font-size: 13px; }
     .v2-main .auth-nav-btn, .v2-main .add-btn { min-height: 42px; border-radius: 13px; }
@@ -1313,6 +1330,7 @@
       .v2-main .topbar-greeting { grid-column: 1; width: 100%; min-width: 0; }
       .v2-main .topbar-greeting h1 { font-size: 20px; }
       .v2-main .topbar-greeting p { font-size: 11px; }
+      .dashboard-logo { width: 40px; height: 40px; }
       .v2-main .topbar-controls { display: grid; grid-column: 1; grid-template-columns: 1fr 1fr; width: 100%; gap: 6px; }
       #page-transactions .topbar-controls > input { min-width: 0 !important; }
       #page-transactions .category-picker { width: 100%; min-width: 0; }
@@ -1383,8 +1401,11 @@
     <!-- Top Bar -->
     <div class="topbar">
       <div class="topbar-greeting">
-        <h1>Your dashboard</h1>
-        <p>Your financial picture, with a little more clarity.</p>
+        <img class="dashboard-logo" src="assets/images/artha-logo-badge.png" alt="Artha">
+        <div class="topbar-copy">
+          <h1>Your dashboard</h1>
+          <p>Your financial picture, with a little more clarity.</p>
+        </div>
       </div>
       <div class="topbar-controls">
         <a class="auth-nav-btn auth-nav-btn-secondary" href="signin.html">Sign in</a>
