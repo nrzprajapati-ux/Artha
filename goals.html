@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Savings Goals — Artha</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/pft-core.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    /* ---- Goals page-specific ---- */
+    .goals-summary {
+      padding: 32px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      align-items: center;
+    }
+    .goals-summary-left .total-saved {
+      font-family: var(--font-mono);
+      font-size: 52px;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      color: var(--accent);
+    }
+    .goals-summary-left .total-label { color: var(--text-muted); font-size: var(--font-sm); margin-bottom: 8px; }
+    .goals-summary-left .target-label { color: var(--text-secondary); font-size: var(--font-sm); margin-top: 10px; }
+    .summary-progress-wrap { margin-top: 18px; }
+    .summary-pct { font-size: var(--font-lg); font-weight: 700; color: var(--text-primary); margin-bottom: 8px; }
+    .summary-track { height: 10px; border-radius: 99px; background: rgba(var(--accent-rgb),.1); overflow: hidden; }
+    .summary-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--accent), #2dd4bf); width: 0; transition: width 1.4s cubic-bezier(0.2,0.8,0.2,1); }
+    .summary-stats { display: flex; gap: 32px; margin-top: 20px; }
+    .summary-stat-val { font-family: var(--font-mono); font-size: var(--font-xl); font-weight: 600; color: var(--text-primary); }
+    .summary-stat-lbl { font-size: var(--font-xs); color: var(--text-muted); }
+
+    /* Goals grid */
+    .goals-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .goal-card { padding: 24px; display: flex; flex-direction: column; gap: 0; cursor: default; }
+    .goal-card-top { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+    .goal-emoji { font-size: 28px; width: 48px; height: 48px; display: grid; place-items: center;
+      background: rgba(var(--accent-rgb),.1); border-radius: 14px; flex-shrink:0; }
+    .goal-name { font-size: var(--font-md); font-weight: 700; letter-spacing: -0.02em; }
+    .goal-ring-row { display: flex; align-items: center; gap: 20px; margin-bottom: 18px; }
+    .goal-ring-wrap { position: relative; flex-shrink: 0; }
+    .goal-ring-wrap svg { transform: rotate(-90deg); }
+    .goal-ring-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .goal-ring-pct { font-family: var(--font-mono); font-size: 18px; font-weight: 700; line-height: 1; color: var(--text-primary); }
+    .goal-ring-done { font-size: 9px; color: var(--text-muted); }
+    .goal-amounts { flex: 1; }
+    .goal-saved-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+    .goal-saved-num { font-family: var(--font-mono); font-size: 20px; font-weight: 700; color: var(--accent); }
+    .goal-target-num { font-size: var(--font-xs); color: var(--text-muted); }
+    .goal-progress-track { height: 5px; border-radius: 99px; background: rgba(var(--accent-rgb),.1); overflow: hidden; }
+    .goal-progress-fill { height: 100%; border-radius: 99px; width: 0; transition: width 1.2s cubic-bezier(0.2,0.8,0.2,1); }
+    .goal-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+    .goal-meta-item { }
+    .goal-meta-label { font-size: 10px; color: var(--text-muted); letter-spacing: .05em; text-transform: uppercase; }
+    .goal-meta-value { font-size: var(--font-sm); font-weight: 600; color: var(--text-secondary); margin-top: 2px; }
+    .goal-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--glass-border); }
+    .status-badge { font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 99px; letter-spacing: .05em; text-transform: uppercase; }
+    .status-on-track { background: rgba(45,212,191,.15); color: var(--inc); }
+    .status-at-risk { background: rgba(251,191,36,.15); color: var(--warn); }
+    .status-completed { background: rgba(96,165,250,.15); color: var(--sav); }
+    .status-not-started { background: rgba(var(--accent-rgb),.08); color: var(--text-muted); }
+    .status-just-started { background: rgba(248,113,113,.12); color: var(--exp); }
+
+    /* Contribution chart */
+    .contrib-section { padding: 28px; }
+    .contrib-bars { display: flex; align-items: flex-end; gap: 8px; height: 100px; margin-top: 16px; }
+    .contrib-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .contrib-bar { width: 100%; border-radius: 6px 6px 0 0; background: rgba(var(--accent-rgb),.15);
+      transition: height 1s cubic-bezier(0.2,0.8,0.2,1); min-height: 4px; position: relative; }
+    .contrib-bar.filled { background: linear-gradient(0deg, var(--accent), rgba(0,212,200,.5)); }
+    [data-theme="light"] .contrib-bar.filled { background: linear-gradient(0deg, #D2C3F6, #6D5398); }
+    .contrib-bar-lbl { font-size: 10px; color: var(--text-muted); }
+
+    /* Modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(2,15,13,.75); backdrop-filter: blur(10px);
+      z-index: 300; display: none; place-items: center; padding: 20px; }
+    .modal-overlay.open { display: grid; }
+    .modal-box { width: min(540px,100%); background: var(--bg-secondary); border: 1px solid var(--glass-border);
+      border-radius: var(--radius-xl); box-shadow: var(--shadow-lg); animation: scaleIn .25s cubic-bezier(.34,1.56,.64,1); padding: 36px; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .modal-title { font-size: var(--font-xl); font-weight: 700; }
+    .modal-close { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 50%;
+      border: 1px solid var(--glass-border); background: var(--bg-card); cursor: pointer; color: var(--text-muted); font-size: 18px; }
+    .modal-close:hover { color: var(--text-primary); }
+    .modal-body { display: flex; flex-direction: column; gap: 16px; }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-label { font-size: var(--font-sm); font-weight: 500; color: var(--text-secondary); }
+    .form-input, .form-select { width: 100%; padding: 11px 14px; background: var(--bg-card);
+      border: 1px solid var(--glass-border); border-radius: var(--radius-sm); color: var(--text-primary);
+      font-size: var(--font-base); font-family: var(--font-sans); transition: all .2s; outline: none; }
+    .form-input:focus, .form-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(var(--accent-rgb),.15); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-select option { background: #041412; color: var(--text-primary); }
+
+    @keyframes scaleIn { from { opacity:0; transform: scale(.93) translateY(10px); } }
+  </style>
+  <link rel="stylesheet" href="assets/css/pft-goals.css">
+</head>
+<body>
+<div class="pft-app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar glass-panel" id="sidebar">
+    <div class="sidebar-brand">
+      <img class="artha-logo-image" src="assets/images/artha-logo.png" alt="Artha — Track, Plan, Grow">
+    </div>
+    <span class="nav-section-label">Main</span>
+    <a class="nav-item" href="dashboard.html"><span class="nav-icon">🏠</span> Dashboard</a>
+    <a class="nav-item" href="transactions.html"><span class="nav-icon">↔️</span> Transactions</a>
+    <a class="nav-item" href="accounts.html"><span class="nav-icon">🏦</span> Accounts</a>
+    <a class="nav-item" href="budgets.html"><span class="nav-icon">📊</span> Budgets</a>
+    <span class="nav-section-label">Planning</span>
+    <a class="nav-item active" href="goals.html"><span class="nav-icon">🎯</span> Savings Goals</a>
+    <a class="nav-item" href="loans.html"><span class="nav-icon">🏛️</span> Loans &amp; EMI</a>
+    <a class="nav-item" href="subscriptions.html"><span class="nav-icon">📱</span> Subscriptions</a>
+    <a class="nav-item" href="insights.html"><span class="nav-icon">💡</span> Insights</a>
+    <span class="nav-section-label">More</span>
+    <a class="nav-item" href="reports.html"><span class="nav-icon">📄</span> Reports</a>
+    <a class="nav-item" href="notifications.html"><span class="nav-icon">🔔</span> Notifications</a>
+    <div class="nav-spacer"></div>
+    <div class="sidebar-footer">
+      <a class="nav-item" href="settings.html"><span class="nav-icon">⚙️</span> Profile &amp; Settings</a>
+      <div class="user-chip">
+        <div class="user-avatar">NJ</div>
+        <div>
+          <div class="user-name">Niranjan</div>
+          <div class="user-role">Premium Plan</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content goals-main">
+
+    <!-- Page Header -->
+    <div class="page-header animate-fadeInUp">
+      <div>
+        <span class="goals-kicker">MONEY · MILESTONES · MOMENTUM</span>
+        <h1 class="page-title">Make room for what matters.</h1>
+        <p class="page-subtitle">A little progress, thoughtfully planned.</p>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-ghost btn-sm" id="theme-toggle">🌙</button>
+        <button class="btn btn-primary goal-new-btn" onclick="document.getElementById('newGoalModal').classList.add('open')">
+          + Set a Goal
+        </button>
+      </div>
+    </div>
+
+    <!-- Summary Card -->
+    <div class="glass-card featured animate-fadeInUp delay-1">
+      <div class="goals-summary">
+        <div class="goals-summary-left">
+          <div class="total-label">Saved across all goals</div>
+          <div class="total-saved" id="totalSaved">₹0</div>
+          <div class="target-label">of ₹8,75,000 across 6 goals</div>
+          <div class="summary-progress-wrap">
+            <div class="summary-pct">11.8% of your combined target</div>
+            <div class="summary-track">
+              <div class="summary-fill" id="summaryFill" role="progressbar" aria-label="Overall savings progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="11.8"></div>
+            </div>
+          </div>
+        </div>
+        <div class="summary-stats">
+          <div class="summary-stat">
+            <div class="summary-stat-val" id="stat0">0</div>
+            <div class="summary-stat-lbl">Goals Active</div>
+          </div>
+          <div class="summary-stat">
+            <div class="summary-stat-val" id="stat1">₹0</div>
+            <div class="summary-stat-lbl">Avg Monthly Needed</div>
+          </div>
+          <div class="summary-stat">
+            <div class="summary-stat-val" id="stat2">0</div>
+            <div class="summary-stat-lbl">On Track</div>
+          </div>
+          <div class="summary-stat">
+            <div class="summary-stat-val" id="stat3">0</div>
+            <div class="summary-stat-lbl">At Risk</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Goals Grid -->
+    <div class="goals-grid">
+
+      <!-- Goal 1: Emergency Fund -->
+      <div class="glass-card goal-card animate-fadeInUp delay-1">
+        <div class="goal-card-top">
+          <div class="goal-emoji">🏥</div>
+          <div>
+            <div class="goal-name">Emergency Fund</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Emergency</div>
+          </div>
+        </div>
+        <div class="goal-ring-row">
+          <div class="goal-ring-wrap">
+            <svg width="90" height="90" viewBox="0 0 90 90">
+              <circle cx="45" cy="45" r="38" fill="none" stroke="rgba(0,212,200,.1)" stroke-width="8"/>
+              <circle class="goal-ring-fill" cx="45" cy="45" r="38" fill="none" stroke="var(--inc)"
+                stroke-width="8" stroke-linecap="round"
+                stroke-dasharray="238.8" stroke-dashoffset="238.8" data-pct="62"/>
+            </svg>
+            <div class="goal-ring-center">
+              <div class="goal-ring-pct">62%</div>
+              <div class="goal-ring-done">done</div>
+            </div>
+          </div>
+          <div class="goal-amounts">
+            <div class="goal-progress-heading"><span>Progress</span><strong>62%</strong></div>
+            <div class="goal-saved-row">
+              <span class="goal-saved-num">₹37,200</span>
+              <span class="goal-target-num">of ₹60,000</span>
+            </div>
+            <div class="goal-progress-track">
+              <div class="goal-progress-fill" style="background:var(--inc);" data-width="62%"></div>
+            </div>
+          </div>
+        </div>
+        <div class="goal-meta">
+          <div class="goal-meta-item">
+            <div class="goal-meta-label">Target Date</div>
+            <div class="goal-meta-value">Mar 2027</div>
+          </div>
+          <div class="goal-meta-item">
+            <div class="goal-meta-label">Days Left</div>
+            <div class="goal-meta-value">134 days</div>
+          </div>
+          <div class="goal-meta-item">
+            <div class="goal-meta-label">Monthly Needed</div>
+            <div class="goal-meta-value" style="color:var(--accent);">₹1,800/mo</div>
+          </div>
+          <div class="goal-meta-item">
+            <div class="goal-meta-label">Remaining</div>
+            <div class="goal-meta-value">₹22,800</div>
+          </div>
+        </div>
+        <div class="goal-footer">
+          <span class="status-badge status-on-track">✓ On Track</span>
+          <button class="btn btn-primary btn-sm">+ Add Money</button>
+        </div>
+      </div>
+
+      <!-- Goal 2: New Laptop -->
+      <div class="glass-card goal-card animate-fadeInUp delay-2">
+        <div class="goal-card-top">
+          <div class="goal-emoji">💻</div>
+          <div>
+            <div class="goal-name">New Laptop</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Purchase</div>
+          </div>
+        </div>
+        <div class="goal-ring-row">
+          <div class="goal-ring-wrap">
+            <svg width="90" height="90" viewBox="0 0 90 90">
+              <circle cx="45" cy="45" r="38" fill="none" stroke="rgba(251,191,36,.1)" stroke-width="8"/>
+              <circle class="goal-ring-fill" cx="45" cy="45" r="38" fill="none" stroke="var(--warn)"
+                stroke-width="8" stroke-linecap="round"
+                stroke-dasharray="238.8" stroke-dashoffset="238.8" data-pct="45"/>
+            </svg>
+            <div class="goal-ring-center">
+              <div class="goal-ring-pct">45%</div>
+              <div class="goal-ring-done">done</div>
+            </div>
+          </div>
+          <div class="goal-amounts">
+            <div class="goal-progress-heading"><span>Progress</span><strong>45%</strong></div>
+            <div class="goal-saved-row">
+              <span class="goal-saved-num">₹27,000</span>
+              <span class="goal-target-num">of ₹60,000</span>
+            </div>
+            <div class="goal-progress-track">
+              <div class="goal-progress-fill" style="background:var(--warn);" data-width="45%"></div>
+            </div>
+          </div>
+        </div>
+        <div class="goal-meta">
+          <div class="goal-meta-item">
+            <div class="goal-meta-label">Target Date</div>
+            <div class="goal-meta-value">Jan 2027</div>
+          </div>
+          <div class="goal-meta-item">
+            <div class="goal-meta-label">Days Left</div>
+            <div class="goal-meta-value" style="color:var(--warn);">76 days</div>
+          </div>
+          <div class="goal-meta-item">
+            <div class="goal-meta-label">Monthly Needed</div>
+            <div class="goal-meta-value" style="color:var(--warn);">₹8,250/mo</div>
+          </div>
+          <div class="goal-meta-item">
+            <div class="goal-meta-label">Remaining</div>
+            <div class="goal-meta-value">₹33,000</div>
+          </div>
+        </div>
+        <div class="goal-footer">
+          <span class="status-badge status-at-risk">⚠ At Risk</span>
+          <button class="btn btn-primary btn-sm">+ Add Money</button>
+        </div>
+      </div>
+
+      <!-- Goal 3: Goa Trip -->
+      <div class="glass-card goal-card animate-fadeInUp delay-3">
+        <div class="goal-card-top">
+          <div class="goal-emoji">🏖️</div>
+          <div>
+            <div class="goal-name">Goa Trip</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Travel</div>
+          </div>
+        </div>
+        <div class="goal-ring-row">
+          <div class="goal-ring-wrap">
+            <svg width="90" height="90" viewBox="0 0 90 90">
+              <circle cx="45" cy="45" r="38" fill="none" stroke="rgba(0,212,200,.1)" stroke-width="8"/>
+              <circle class="goal-ring-fill" cx="45" cy="45" r="38" fill="none" stroke="var(--inc)"
+                stroke-width="8" stroke-linecap="round"
+                stroke-dasharray="238.8" stroke-dashoffset="238.8" data-pct="80"/>
+            </svg>
+            <div class="goal-ring-center">
+              <div class="goal-ring-pct">80%</div>
+              <div class="goal-ring-done">done</div>
+            </div>
+          </div>
+          <div class="goal-amounts">
+            <div class="goal-progress-heading"><span>Progress</span><strong>80%</strong></div>
+            <div class="goal-saved-row">
+              <span class="goal-saved-num">₹24,000</span>
+              <span class="goal-target-num">of ₹30,000</span>
+            </div>
+            <div class="goal-progress-track">
+              <div class="goal-progress-fill" style="background:var(--inc);" data-width="80%"></div>
+            </div>
+          </div>
+        </div>
+        <div class="goal-meta">
+          <div class="goal-meta-item">
+            <div class="goal-meta-label">Target Date</div>
+            <div class="goal-meta-value">Dec 2026</div>
+          </div>
+          <div class="goal-meta-item">
+            <div class="goal-meta-label">Days Left</div>
+            <div class="goal-meta-value">44 days</div>
+          </div>
+          <div class="goal-meta-item">
+            <div class="goal-meta-label">Monthly Needed</div>
+            <div class="goal-meta-value" style="color:var(--accent);">₹1,500/mo</div>
+          </div>
+          <div class="goal-meta-item">
+            <div class="goal-meta-label">Remaining</div>
+            <div class="goal-meta-value">₹6,000</div>
+          </div>
+        </div>
+        <div class="goal-footer">
+          <span class="status-badge status-on-track">✓ On Track</span>
+          <button class="btn btn-primary btn-sm">+ Add Money</button>
+        </div>
+      </div>
+
+      <!-- Goal 4: Course Fees -->
+      <div class="glass-card goal-card animate-fadeInUp delay-2">
+        <div class="goal-card-top">
+          <div class="goal-emoji">📚</div>
+          <div>
+            <div class="goal-name">Course Fees</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Education</div>
+          </div>
+        </div>
+        <div class="goal-ring-row">
+          <div class="goal-ring-wrap">
+            <svg width="90" height="90" viewBox="0 0 90 90">
+              <circle cx="45" cy="45" r="38" fill="none" stroke="rgba(248,113,113,.1)" stroke-width="8"/>
+              <circle class="goal-ring-fill" cx="45" cy="45" r="38" fill="none" stroke="var(--exp)"
+                stroke-width="8" stroke-linecap="round"
+                stroke-dasharray="238.8" stroke-dashoffset="238.8" data-pct="28"/>
+            </svg>
+            <div class="goal-ring-center">
+              <div class="goal-ring-pct">28%</div>
+              <div class="goal-ring-done">done</div>
+            </div>
+          </div>
+          <div class="goal-amounts">
+            <div class="goal-progress-heading"><span>Progress</span><strong>28%</strong></div>
+            <div class="goal-saved-row">
+              <span class="goal-saved-num">₹7,000</span>
+              <span class="goal-target-num">of ₹25,000</span>
+            </div>
+            <div class="goal-progress-track">
+              <div class="goal-progress-fill" style="background:var(--exp);" data-width="28%"></div>
+            </div>
+          </div>
+        </div>
+        <div class="goal-meta">
+          <div class="goal-meta-item">
+            <div class="goal-meta-label">Target Date</div>
+            <div class="goal-meta-value">Feb 2027</div>
+          </div>
+          <div class="goal-meta-item">
+            <div class="goal-meta-label">Days Left</div>
+            <div class="goal-meta-value" style="color:var(--exp);">97 days</div>
+          </div>
+          <div class="goal-meta-item">
+            <div class="goal-meta-label">Monthly Needed</div>
+            <div class="goal-meta-value" style="color:var(--warn);">₹2,750/mo</div>
+          </div>
+          <div class="goal-meta-item">
+            <div class="goal-meta-label">Remaining</div>
+            <div class="goal-meta-value">₹18,000</div>
+          </div>
+        </div>
+        <div class="goal-footer">
+          <span class="status-badge status-at-risk">⚠ At Risk</span>
+          <button class="btn btn-primary btn-sm">+ Add Money</button>
+        </div>
+      </div>
+
+      <!-- Goal 5: House Down Payment -->
+      <div class="glass-card goal-card animate-fadeInUp delay-3">
+        <div class="goal-card-top">
+          <div class="goal-emoji">🏠</div>
+          <div>
+            <div class="goal-name">House Down Payment</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Property</div>
+          </div>
+        </div>
+        <div class="goal-ring-row">
+          <div class="goal-ring-wrap">
+            <svg width="90" height="90" viewBox="0 0 90 90">
+              <circle cx="45" cy="45" r="38" fill="none" stroke="rgba(96,165,250,.1)" stroke-width="8"/>
+              <circle class="goal-ring-fill" cx="45" cy="45" r="38" fill="none" stroke="var(--sav)"
+                stroke-width="8" stroke-linecap="round"
+                stroke-dasharray="238.8" stroke-dashoffset="238.8" data-pct="1.5"/>
+            </svg>
+            <div class="goal-ring-center">
+              <div class="goal-ring-pct" style="font-size:14px;">1.5%</div>
+              <div class="goal-ring-done">done</div>
+            </div>
+          </div>
+          <div class="goal-amounts">
+            <div class="goal-progress-heading"><span>Progress</span><strong>1.5%</strong></div>
+            <div class="goal-saved-row">
+              <span class="goal-saved-num">₹7,650</span>
+              <span class="goal-target-num">of ₹5,00,000</span>
+            </div>
+            <div class="goal-progress-track">
+              <div class="goal-progress-fill" style="background:var(--sav);" data-width="1.5%"></div>
+            </div>
+          </div>
+        </div>
+        <div class="goal-meta">
+          <div class="goal-meta-item">
+            <div class="goal-meta-label">Target Date</div>
+            <div class="goal-meta-value">Dec 2029</div>
+          </div>
+          <div class="goal-meta-item">
+            <div class="goal-meta-label">Days Left</div>
+            <div class="goal-meta-value">1,140 days</div>
+          </div>
+          <div class="goal-meta-item">
+            <div class="goal-meta-label">Monthly Needed</div>
+            <div class="goal-meta-value" style="color:var(--accent);">₹10,250/mo</div>
+          </div>
+          <div class="goal-meta-item">
+            <div class="goal-meta-label">Remaining</div>
+            <div class="goal-meta-value">₹4,92,350</div>
+          </div>
+        </div>
+        <div class="goal-footer">
+          <span class="status-badge status-just-started">🚀 Just Started</span>
+          <button class="btn btn-primary btn-sm">+ Add Money</button>
+        </div>
+      </div>
+
+      <!-- Goal 6: Europe Trip -->
+      <div class="glass-card goal-card animate-fadeInUp delay-4">
+        <div class="goal-card-top">
+          <div class="goal-emoji">✈️</div>
+          <div>
+            <div class="goal-name">Europe Trip</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Travel</div>
+          </div>
+        </div>
+        <div class="goal-ring-row">
+          <div class="goal-ring-wrap">
+            <svg width="90" height="90" viewBox="0 0 90 90">
+              <circle cx="45" cy="45" r="38" fill="none" stroke="rgba(var(--accent-rgb),.08)" stroke-width="8"/>
+              <circle class="goal-ring-fill" cx="45" cy="45" r="38" fill="none" stroke="rgba(var(--accent-rgb),.3)"
+                stroke-width="8" stroke-linecap="round"
+                stroke-dasharray="238.8" stroke-dashoffset="238.8" data-pct="0"/>
+            </svg>
+            <div class="goal-ring-center">
+              <div class="goal-ring-pct" style="color:var(--text-muted);">0%</div>
+              <div class="goal-ring-done">done</div>
+            </div>
+          </div>
+          <div class="goal-amounts">
+            <div class="goal-progress-heading"><span>Progress</span><strong>0%</strong></div>
+            <div class="goal-saved-row">
+              <span class="goal-saved-num" style="color:var(--text-muted);">₹0</span>
+              <span class="goal-target-num">of ₹2,00,000</span>
+            </div>
+            <div class="goal-progress-track">
+              <div class="goal-progress-fill" style="background:var(--text-muted);" data-width="0%"></div>
+            </div>
+          </div>
+        </div>
+        <div class="goal-meta">
+          <div class="goal-meta-item">
+            <div class="goal-meta-label">Target Date</div>
+            <div class="goal-meta-value">Jun 2028</div>
+          </div>
+          <div class="goal-meta-item">
+            <div class="goal-meta-label">Days Left</div>
+            <div class="goal-meta-value">580 days</div>
+          </div>
+          <div class="goal-meta-item">
+            <div class="goal-meta-label">Monthly Needed</div>
+            <div class="goal-meta-value" style="color:var(--accent);">₹5,750/mo</div>
+          </div>
+          <div class="goal-meta-item">
+            <div class="goal-meta-label">Remaining</div>
+            <div class="goal-meta-value">₹2,00,000</div>
+          </div>
+        </div>
+        <div class="goal-footer">
+          <span class="status-badge status-not-started">◦ Not Started</span>
+          <button class="btn btn-primary btn-sm">+ Add Money</button>
+        </div>
+      </div>
+
+    </div><!-- /goals-grid -->
+
+    <!-- Contribution History -->
+    <div class="glass-card contrib-section animate-fadeInUp delay-3">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Contribution History — Emergency Fund</div>
+          <div class="card-subtitle">Monthly contributions over the last 7 months</div>
+        </div>
+        <select class="form-input" style="width:auto;padding:7px 12px;font-size:13px;">
+          <option>Emergency Fund</option>
+          <option>New Laptop</option>
+          <option>Goa Trip</option>
+        </select>
+      </div>
+      <div style="position:relative;height:180px;">
+        <canvas id="contribChart"></canvas>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- New Goal Modal -->
+<div class="modal-overlay" id="newGoalModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">🎯 New Savings Goal</div>
+      <button class="modal-close" onclick="document.getElementById('newGoalModal').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Goal Name</label>
+        <input class="form-input" type="text" placeholder="e.g. Vacation Fund">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Target Amount (₹)</label>
+          <input class="form-input" type="number" placeholder="50,000">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Current Saved (₹)</label>
+          <input class="form-input" type="number" placeholder="0">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Target Date</label>
+          <input class="form-input" type="date">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Monthly Contribution (₹)</label>
+          <input class="form-input" type="number" placeholder="2,000">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Category</label>
+        <select class="form-input form-select">
+          <option value="">Select category</option>
+          <option>Travel</option>
+          <option>Emergency</option>
+          <option>Purchase</option>
+          <option>Education</option>
+          <option>Property</option>
+          <option>Investment</option>
+          <option>Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="document.getElementById('newGoalModal').classList.remove('open')">Cancel</button>
+      <button class="btn btn-primary">Create Goal</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Theme toggle
+  const root = document.documentElement;
+  const themeBtn = document.getElementById('theme-toggle');
+  themeBtn.onclick = () => {
+    const isLight = root.dataset.theme === 'light';
+    root.dataset.theme = isLight ? 'dark' : 'light';
+    themeBtn.textContent = isLight ? '🌙' : '☀️';
+    localStorage.setItem('pft-theme', root.dataset.theme);
+    if (typeof drawCharts === 'function') drawCharts();
+  };
+  try { const t = localStorage.getItem('pft-theme'); if(t) { root.dataset.theme = t; themeBtn.textContent = t==='light'?'☀️':'🌙'; }} catch(e){}
+
+  // Close modal on overlay click
+  document.getElementById('newGoalModal').addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('open');
+  });
+
+  // Animate KPI counters
+  function animateCount(el, target, prefix='', suffix='', duration=1200) {
+    const start = performance.now();
+    const isDecimal = target % 1 !== 0;
+    function step(now) {
+      const p = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      const val = eased * target;
+      el.textContent = prefix + (isDecimal ? val.toFixed(1) : Math.round(val).toLocaleString('en-IN')) + suffix;
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  // Animate rings
+  function animateRings() {
+    document.querySelectorAll('.goal-ring-fill').forEach(circle => {
+      const pct = parseFloat(circle.dataset.pct);
+      const circumference = 238.8;
+      const offset = circumference - (pct / 100) * circumference;
+      setTimeout(() => { circle.style.strokeDashoffset = offset; }, 300);
+    });
+    document.querySelectorAll('.goal-progress-fill').forEach(bar => {
+      setTimeout(() => { bar.style.width = bar.dataset.width; }, 400);
+    });
+  }
+
+  // Animate summary fill
+  setTimeout(() => {
+    document.getElementById('summaryFill').style.width = '11.8%';
+  }, 300);
+
+  // KPI counters
+  animateCount(document.getElementById('totalSaved'), 102850, '₹', '', 1400);
+  animateCount(document.getElementById('stat0'), 6, '', '', 800);
+  animateCount(document.getElementById('stat1'), 5050, '₹', '/mo', 1000);
+  animateCount(document.getElementById('stat2'), 2, '', '', 800);
+  animateCount(document.getElementById('stat3'), 2, '', '', 800);
+
+  animateRings();
+
+  // Chart
+  let contribChartInst = null;
+  function drawCharts() {
+    const textCol = 'rgba(25,59,50,0.62)';
+    const gridCol = 'rgba(25,59,50,0.12)';
+    const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+    const accentRgb = getComputedStyle(document.documentElement).getPropertyValue('--accent-rgb').trim();
+    if (contribChartInst) contribChartInst.destroy();
+    contribChartInst = new Chart(document.getElementById('contribChart'), {
+      type: 'bar',
+      data: {
+        labels: ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov'],
+        datasets: [{
+          label: 'Monthly Contribution (₹)',
+          data: [1800, 2200, 1800, 3000, 1800, 1800, 2000],
+          backgroundColor: `rgba(${accentRgb},0.25)`,
+          borderColor: accent,
+          borderWidth: 2,
+          borderRadius: 8,
+          borderSkipped: false,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { color: gridCol }, ticks: { color: textCol } },
+          y: { grid: { color: gridCol }, ticks: { color: textCol, callback: v => '₹' + v.toLocaleString('en-IN') } }
+        }
+      }
+    });
+  }
+  drawCharts();
+</script>
+</body>
+</html>

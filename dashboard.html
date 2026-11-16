@@ -1,0 +1,2806 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Artha — Personal Finance Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/pft-core.css">
+  <style>
+    /* ── Reset & base ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    /* ── CSS Variables ────────────────────────────────────── */
+    :root {
+      --bg-primary: #030b09;
+      --bg-secondary: #071512;
+      --bg-card: rgba(7,40,32,0.48);
+      --bg-card-hover: rgba(10,55,43,0.62);
+      --glass-border: rgba(36,207,151,0.15);
+      --glass-border-hover: rgba(36,207,151,0.34);
+      --text-primary: #F0EDE4;
+      --text-secondary: rgba(240,237,228,0.65);
+      --text-muted: rgba(240,237,228,0.4);
+      --accent: #20d39a;
+      --accent-rgb: 32,211,154;
+      --accent-glow: rgba(32,211,154,0.25);
+      --accent-ink: #20d39a;
+      --sidebar-bg: rgba(3,14,11,0.88);
+      --v2-emerald: #20d39a;
+      --v2-emerald-bright: #62f0c0;
+      --v2-gold: #d7b76b;
+      --v2-red: #ff7778;
+      --v2-red-rgb: 255,119,120;
+      --v2-obsidian: #030b09;
+      --v2-surface: rgba(7,28,23,0.76);
+      --inc: #2dd4bf;
+      --inc-rgb: 45,212,191;
+      --exp: #f87171;
+      --sav: #60a5fa;
+      --warn: #fbbf24;
+      --shadow-sm: 0 4px 16px rgba(0,0,0,0.3);
+      --shadow-md: 0 8px 32px rgba(0,0,0,0.4);
+      --shadow-lg: 0 16px 64px rgba(0,0,0,0.5);
+      --radius-sm: 10px;
+      --radius-md: 16px;
+      --radius-lg: 20px;
+      --radius-xl: 28px;
+      --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+      --sidebar-width: 260px;
+    }
+    [data-theme="light"] {
+      --bg-primary: #F0EDE4;
+      --bg-secondary: #E8E4D9;
+      --bg-card: rgba(255,255,255,0.65);
+      --bg-card-hover: rgba(255,255,255,0.88);
+      --glass-border: rgba(109,83,152,0.2);
+      --glass-border-hover: rgba(109,83,152,0.38);
+      --text-primary: #004741;
+      --text-secondary: rgba(0,71,65,0.72);
+      --text-muted: rgba(0,71,65,0.45);
+      --accent: #D2C3F6;
+      --accent-rgb: 210,195,246;
+      --accent-glow: rgba(210,195,246,0.3);
+      --accent-ink: #6D5398;
+      --sidebar-bg: rgba(240,237,228,0.95);
+      --v2-emerald: #D2C3F6;
+      --v2-emerald-bright: #6D5398;
+      --v2-gold: #a37a2c;
+      --v2-red: #c94343;
+      --v2-red-rgb: 201,67,67;
+      --v2-obsidian: #f0ede4;
+      --v2-surface: rgba(255,255,255,0.72);
+      --inc: #0d9488;
+      --inc-rgb: 13,148,136;
+      --exp: #dc2626;
+      --sav: #2563eb;
+      --warn: #d97706;
+      --shadow-sm: 0 4px 16px rgba(0,71,65,0.1);
+      --shadow-md: 0 8px 32px rgba(0,71,65,0.15);
+      --shadow-lg: 0 16px 64px rgba(0,71,65,0.2);
+    }
+
+    /* ── Body & Background ────────────────────────────────── */
+    body {
+      font-family: var(--font-sans);
+      font-size: 15px;
+      color: var(--text-primary);
+      background-color: var(--bg-primary);
+      background-image:
+        radial-gradient(ellipse 80% 60% at 70% -10%, rgba(0,71,65,0.6) 0%, transparent 50%),
+        radial-gradient(ellipse 60% 50% at 20% 110%, rgba(0,71,65,0.4) 0%, transparent 55%);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+    [data-theme="light"] body {
+      background-image:
+        radial-gradient(ellipse 80% 60% at 70% -10%, rgba(125,96,171,0.13) 0%, transparent 50%),
+        radial-gradient(ellipse 60% 50% at 20% 110%, rgba(210,195,246,0.24) 0%, transparent 55%);
+    }
+    body::before, body::after {
+      content: '';
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(100px);
+      z-index: -1;
+      pointer-events: none;
+      animation: drift 20s ease-in-out infinite alternate;
+    }
+    body::before {
+      width: 50vw; height: 50vw;
+      top: -20vw; right: -10vw;
+      background: radial-gradient(circle, rgba(0,71,65,0.5) 0%, transparent 70%);
+    }
+    body::after {
+      width: 40vw; height: 40vw;
+      bottom: -15vw; left: 5vw;
+      background: radial-gradient(circle, rgba(0,116,106,0.35) 0%, transparent 70%);
+      animation-duration: 25s;
+      animation-direction: alternate-reverse;
+    }
+    [data-theme="light"] body::before { background: radial-gradient(circle, rgba(210,195,246,0.26) 0%, transparent 70%); }
+    [data-theme="light"] body::after  { background: radial-gradient(circle, rgba(125,96,171,0.12) 0%, transparent 70%); }
+    @keyframes drift { to { transform: translate(-3vw, 4vw) scale(1.1); } }
+
+    /* ── App layout ───────────────────────────────────────── */
+    .pft-app {
+      display: grid;
+      grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    /* ── Sidebar ──────────────────────────────────────────── */
+    .sidebar {
+      position: fixed;
+      left: 0; top: 0; bottom: 0;
+      width: var(--sidebar-width);
+      z-index: 100;
+      overflow-y: auto;
+      background: var(--sidebar-bg);
+      backdrop-filter: blur(24px) saturate(160%);
+      -webkit-backdrop-filter: blur(24px) saturate(160%);
+      border-right: 1px solid var(--glass-border);
+      padding: 24px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      scrollbar-width: none;
+    }
+    .sidebar::-webkit-scrollbar { display: none; }
+    .sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 0 10px 20px;
+      margin-bottom: 4px;
+    }
+    .brand-logo {
+      width: 38px; height: 38px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #00d4c8, #004741);
+      color: #F0EDE4;
+      display: grid;
+      place-items: center;
+      font-size: 20px;
+      font-weight: 700;
+      flex-shrink: 0;
+      box-shadow: 0 4px 16px rgba(0,212,200,0.4);
+    }
+    .brand-text { line-height: 1.1; }
+    .brand-text strong { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; display: block; }
+    .brand-text small  { font-size: 11px; color: var(--text-muted); }
+    .nav-section-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      padding: 10px 12px 4px;
+      margin-top: 6px;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background var(--transition), color var(--transition);
+      cursor: pointer;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      position: relative;
+    }
+    .nav-item:hover { background: var(--bg-card); color: var(--text-primary); }
+    .nav-item.active {
+      background: rgba(var(--accent-rgb), 0.15);
+      color: var(--accent-ink, var(--accent));
+      font-weight: 600;
+    }
+    .nav-item.active::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 20%; bottom: 20%;
+      width: 3px;
+      border-radius: 0 3px 3px 0;
+      background: var(--accent);
+    }
+    .nav-icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+    .sidebar-spacer { flex: 1; min-height: 16px; }
+    .sidebar-bottom {
+      border-top: 1px solid var(--glass-border);
+      padding-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .sidebar-credit {
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-muted);
+      padding: 8px 12px 4px;
+    }
+
+    /* ── Main content ─────────────────────────────────────── */
+    .main-content {
+      grid-column: 2;
+      min-width: 0;
+      padding: 24px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    /* ── Top bar ──────────────────────────────────────────── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .topbar-greeting { flex: 1; min-width: 200px; }
+    .topbar-greeting h1 {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+    .topbar-greeting p { color: var(--text-secondary); font-size: 14px; margin-top: 2px; }
+    .topbar-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .period-select, .auth-nav-btn, .add-btn, .hamburger {
+      border-radius: var(--radius-sm);
+      padding: 9px 14px;
+      font-size: 14px;
+      font-family: var(--font-sans);
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition);
+      border: 1px solid var(--glass-border);
+    }
+    .auth-nav-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+      text-decoration: none;
+    }
+    .auth-nav-btn-primary {
+      background: linear-gradient(135deg, #00d4c8, #007a70);
+      color: #F0EDE4;
+      border-color: transparent;
+      font-weight: 600;
+    }
+    .auth-nav-btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,212,200,0.35);
+    }
+    [data-theme="light"] .auth-nav-btn-primary,
+    [data-theme="light"] .add-btn,
+    [data-theme="light"] .modal-save {
+      background: linear-gradient(135deg, #D2C3F6, #BFAAE9);
+      color: #322448;
+      box-shadow: 0 4px 16px rgba(109,83,152,.22);
+    }
+    [data-theme="light"] .auth-nav-btn-primary:hover,
+    [data-theme="light"] .add-btn:hover,
+    [data-theme="light"] .modal-save:hover {
+      box-shadow: 0 8px 24px rgba(109,83,152,.3);
+    }
+    .auth-nav-btn-secondary {
+      background: var(--bg-card);
+      color: var(--text-primary);
+      backdrop-filter: blur(10px);
+    }
+    .auth-nav-btn-secondary:hover {
+      border-color: var(--glass-border-hover);
+      background: var(--bg-card-hover);
+    }
+    .period-select {
+      background: var(--bg-card);
+      color: var(--text-primary);
+      color-scheme: dark;
+      backdrop-filter: blur(10px);
+    }
+    [data-theme="light"] .period-select { color-scheme: light; }
+    .period-select:hover { border-color: var(--glass-border-hover); background: var(--bg-card-hover); }
+    .category-picker { position: relative; z-index: 20; width: 184px; }
+    .category-trigger {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      width: 100%;
+      min-height: 40px;
+      padding: 9px 13px;
+      border: 1px solid rgba(var(--accent-rgb),.36);
+      border-radius: 12px;
+      background: linear-gradient(145deg,rgba(var(--accent-rgb),.14),rgba(7,40,32,.76));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.08),0 8px 22px rgba(0,0,0,.2);
+      color: var(--text-primary);
+      font: 500 14px var(--font-sans);
+      text-align: left;
+      cursor: pointer;
+      -webkit-backdrop-filter: blur(14px) saturate(160%);
+      backdrop-filter: blur(14px) saturate(160%);
+      transition: border-color .2s ease,background .2s ease,box-shadow .2s ease;
+    }
+    .category-trigger:hover,
+    .category-trigger:focus-visible,
+    .category-trigger[aria-expanded="true"] {
+      border-color: var(--v2-emerald);
+      background: linear-gradient(145deg,rgba(var(--accent-rgb),.2),rgba(7,40,32,.86));
+      box-shadow: 0 0 0 3px rgba(var(--accent-rgb),.1),0 12px 28px rgba(0,0,0,.28);
+      outline: none;
+    }
+    [data-theme="light"] .category-trigger {
+      background: linear-gradient(145deg,rgba(255,255,255,.9),rgba(240,233,251,.86));
+    }
+    [data-theme="light"] .category-trigger:hover,
+    [data-theme="light"] .category-trigger:focus-visible,
+    [data-theme="light"] .category-trigger[aria-expanded="true"] {
+      background: linear-gradient(145deg,rgba(255,255,255,.98),rgba(232,220,250,.9));
+    }
+    .category-chevron { width: 15px; height: 15px; flex: 0 0 15px; transition: transform .2s ease; }
+    .category-trigger[aria-expanded="true"] .category-chevron { transform: rotate(180deg); }
+    .category-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      z-index: 200;
+      width: 100%;
+      min-width: 200px;
+      max-height: min(65vh,320px);
+      overflow-y: auto;
+      padding: 7px;
+      border: 1px solid rgba(var(--accent-rgb),.27);
+      border-radius: 15px;
+      background:
+        radial-gradient(ellipse at 12% 0%,rgba(var(--accent-rgb),.16),transparent 58%),
+        linear-gradient(145deg,rgba(7,34,27,.91),rgba(3,14,11,.93));
+      box-shadow: 0 18px 42px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.08);
+      -webkit-backdrop-filter: blur(22px) saturate(170%);
+      backdrop-filter: blur(22px) saturate(170%);
+      animation: categoryMenuIn .18s ease-out both;
+    }
+    .category-menu[hidden] { display: none; }
+    [data-theme="light"] .category-menu {
+      background:
+        radial-gradient(ellipse at 12% 0%,rgba(var(--accent-rgb),.12),transparent 58%),
+        linear-gradient(145deg,rgba(255,255,255,.94),rgba(240,235,249,.95));
+      box-shadow: 0 18px 42px rgba(83,60,130,.18),inset 0 1px 0 rgba(255,255,255,.9);
+    }
+    .category-option {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      width: 100%;
+      padding: 9px 10px;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      background: transparent;
+      color: var(--text-secondary);
+      font: 500 13px var(--font-sans);
+      text-align: left;
+      cursor: pointer;
+      transition: color .16s ease,background .16s ease,border-color .16s ease;
+    }
+    .category-option:hover,
+    .category-option:focus-visible {
+      border-color: rgba(var(--accent-rgb),.18);
+      background: rgba(var(--accent-rgb),.1);
+      color: var(--text-primary);
+      outline: none;
+    }
+    .category-option[aria-selected="true"] {
+      border-color: rgba(var(--accent-rgb),.27);
+      background: rgba(var(--accent-rgb),.16);
+      color: var(--v2-emerald-bright);
+    }
+    [data-theme="light"] .category-option[aria-selected="true"] {
+      background: rgba(var(--accent-rgb),.1);
+      color: var(--accent-ink);
+    }
+    .category-option-check { color: var(--v2-emerald); opacity: 0; }
+    [data-theme="light"] .category-option-check { color: var(--accent-ink); }
+    .category-option[aria-selected="true"] .category-option-check { opacity: 1; }
+    @keyframes categoryMenuIn {
+      from { opacity: 0; transform: translateY(-5px) scale(.985); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .add-btn {
+      background: linear-gradient(135deg, #00d4c8, #007a70);
+      color: #F0EDE4;
+      border-color: transparent;
+      font-weight: 600;
+      box-shadow: 0 4px 16px rgba(0,212,200,0.3);
+    }
+    .add-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,212,200,0.4); }
+    .hamburger { display: none; background: var(--bg-card); color: var(--text-primary); font-size: 18px; padding: 9px 12px; }
+
+    /* ── Glass card ───────────────────────────────────────── */
+    .glass-card {
+      background: var(--bg-card);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255,255,255,0.06);
+      backdrop-filter: blur(20px) saturate(140%);
+      -webkit-backdrop-filter: blur(20px) saturate(140%);
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .glass-card:hover { border-color: var(--glass-border-hover); }
+
+    /* ── KPI Cards ────────────────────────────────────────── */
+    .kpi-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+    .kpi-card {
+      padding: 22px 24px;
+      position: relative;
+      overflow: hidden;
+      animation: fadeInUp 0.6s ease both;
+    }
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity var(--transition);
+    }
+    .kpi-card:hover::before { opacity: 1; }
+    .kpi-label { font-size: 13px; font-weight: 500; color: var(--text-secondary); }
+    .kpi-value {
+      display: block;
+      font-size: 36px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin: 8px 0 10px;
+      font-variant-numeric: tabular-nums;
+    }
+    .kpi-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 99px;
+    }
+    .kpi-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+    /* Featured KPI (Total Balance) */
+    .kpi-featured {
+      background: linear-gradient(135deg, rgba(0,212,200,0.25) 0%, rgba(0,71,65,0.5) 100%) !important;
+      border-color: rgba(0,212,200,0.3) !important;
+    }
+    .kpi-featured .kpi-label { color: rgba(240,237,228,0.8); }
+    .kpi-featured .kpi-value { color: #00d4c8; font-size: 40px; }
+    .kpi-featured .kpi-badge { background: rgba(0,212,200,0.2); color: #00d4c8; }
+    [data-theme="light"] .kpi-featured { background: linear-gradient(135deg, rgba(210,195,246,0.82) 0%, rgba(210,195,246,0.44) 100%) !important; }
+    [data-theme="light"] .kpi-featured .kpi-value { color: #322448; }
+    [data-theme="light"] .kpi-featured .kpi-badge { background: rgba(109,83,152,0.14); color: #6D5398; }
+
+    .kpi-inc .kpi-value { color: var(--inc); }
+    .kpi-inc .kpi-badge { background: rgba(45,212,191,0.12); color: var(--inc); }
+    .kpi-exp .kpi-value { color: var(--exp); }
+    .kpi-exp .kpi-badge { background: rgba(248,113,113,0.12); color: var(--exp); }
+    .kpi-sav .kpi-value { color: var(--sav); }
+    .kpi-sav .kpi-badge { background: rgba(96,165,250,0.12); color: var(--sav); }
+
+    /* ── 12-col grid ──────────────────────────────────────── */
+    .grid-12 { display: grid; grid-template-columns: repeat(12,1fr); gap: 18px; }
+    .col-3  { grid-column: span 3; }
+    .col-4  { grid-column: span 4; }
+    .col-5  { grid-column: span 5; }
+    .col-6  { grid-column: span 6; }
+    .col-7  { grid-column: span 7; }
+    .col-8  { grid-column: span 8; }
+    .col-12 { grid-column: span 12; }
+
+    /* ── Card anatomy ─────────────────────────────────────── */
+    .card-pad { padding: 22px; }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .card-title { font-size: 15px; font-weight: 600; }
+    .card-link { font-size: 13px; color: var(--text-muted); text-decoration: none; transition: color var(--transition); }
+    .card-link:hover { color: var(--accent-ink, var(--accent)); }
+    .chart-wrap { position: relative; height: 230px; }
+
+    /* ── Budget bars ──────────────────────────────────────── */
+    .bud-item { margin-bottom: 16px; }
+    .bud-item:last-child { margin-bottom: 0; }
+    .bud-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+    .bud-name { font-weight: 500; }
+    .bud-amt { color: var(--text-secondary); }
+    .bud-amt.over-amt { color: var(--exp); font-weight: 600; }
+    .bar-track { height: 8px; border-radius: 8px; background: var(--bg-card-hover); overflow: hidden; }
+    .bar-fill { height: 100%; width: 0; border-radius: 8px; background: var(--accent); transition: width 1.2s cubic-bezier(0.2,0.8,0.2,1); }
+    .bar-fill.bar-warn { background: var(--warn); }
+    .bar-fill.bar-over { background: var(--exp); }
+
+    /* ── Dashboard savings goals ──────────────────────────── */
+    .dashboard-goal-list { display: flex; flex-direction: column; gap: 12px; }
+    .dashboard-goal-row {
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+      color: inherit;
+      text-decoration: none;
+    }
+    .dashboard-goal-icon, .goal-card-icon {
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      color: var(--accent-ink, var(--accent));
+      background: rgba(var(--accent-rgb),0.12);
+      border: 1px solid rgba(var(--accent-rgb),0.18);
+      border-radius: 11px;
+    }
+    .dashboard-goal-icon { width: 34px; height: 34px; font-size: 16px; }
+    .dashboard-goal-copy { min-width: 0; }
+    .dashboard-goal-heading, .dashboard-goal-amount {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .dashboard-goal-heading { font-size: 12px; line-height: 1.5; }
+    .dashboard-goal-heading strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .dashboard-goal-heading span { color: var(--accent-ink, var(--accent)); font-weight: 700; }
+    .dashboard-goal-amount { margin: 2px 0 6px; color: var(--text-muted); font-size: 10px; }
+    .dashboard-goal-track, .goal-progress-track {
+      height: 6px;
+      overflow: hidden;
+      border-radius: 99px;
+      background: var(--bg-card-hover);
+    }
+    .dashboard-goal-track span, .goal-progress-track span {
+      display: block;
+      width: var(--goal-progress);
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--goal-color, var(--accent)), rgba(45,212,191,0.9));
+    }
+    [data-theme="light"] .dashboard-goal-track span,
+    [data-theme="light"] .goal-progress-track span { background: linear-gradient(90deg, #D2C3F6, #6D5398); }
+    .goals-page-heading, .goals-section-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .goals-page-heading { margin-bottom: 2px; }
+    .goals-eyebrow {
+      color: var(--accent-ink, var(--accent));
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+    .goals-page-description { margin-top: 5px; color: var(--text-secondary); font-size: 14px; }
+    .goals-overview {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(230px, 0.85fr);
+      gap: 16px;
+    }
+    .goal-hero {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 22px;
+      min-height: 220px;
+      padding: 26px 30px;
+      overflow: hidden;
+      background:
+        radial-gradient(ellipse at 85% 15%, rgba(0,212,200,0.15), transparent 44%),
+        var(--bg-card);
+    }
+    [data-theme="light"] .goal-hero {
+      background: radial-gradient(ellipse at 85% 15%, rgba(210,195,246,0.18), transparent 44%), var(--bg-card);
+    }
+    .goal-hero-copy { position: relative; z-index: 1; min-width: 0; }
+    .goal-hero-label { color: var(--text-secondary); font-size: 13px; font-weight: 600; }
+    .goal-hero-total {
+      display: block;
+      margin-top: 8px;
+      color: var(--accent-ink, var(--accent));
+      font: 700 clamp(28px, 3.2vw, 40px)/1.15 var(--font-mono);
+      letter-spacing: -0.05em;
+    }
+    .goal-hero-target { margin-top: 5px; color: var(--text-secondary); font-size: 13px; }
+    .goal-hero-progress { width: min(390px, 100%); margin-top: 20px; }
+    .goal-hero-progress .goal-progress-track { height: 9px; }
+    .goal-hero-foot {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 8px;
+      color: var(--text-muted);
+      font-size: 11px;
+    }
+    .goal-overall-ring {
+      display: grid;
+      place-items: center;
+      width: 132px;
+      height: 132px;
+      flex: 0 0 132px;
+      border-radius: 50%;
+      background: conic-gradient(var(--accent) var(--goal-progress), rgba(0,212,200,0.12) 0);
+      box-shadow: 0 0 32px rgba(0,212,200,0.12);
+    }
+    [data-theme="light"] .goal-overall-ring {
+      background: conic-gradient(var(--accent) var(--goal-progress), rgba(210,195,246,0.15) 0);
+      box-shadow: 0 0 32px rgba(210,195,246,0.18);
+    }
+    .goal-overall-ring::before {
+      content: "";
+      grid-area: 1 / 1;
+      width: 106px;
+      height: 106px;
+      border-radius: 50%;
+      background: var(--bg-secondary);
+      border: 1px solid var(--glass-border);
+    }
+    .goal-overall-ring span {
+      grid-area: 1 / 1;
+      z-index: 1;
+      color: var(--text-primary);
+      font: 700 25px var(--font-mono);
+    }
+    .goal-stats { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    .goal-stat {
+      display: grid;
+      grid-template-columns: 38px minmax(0, 1fr);
+      align-items: center;
+      gap: 11px;
+      padding: 15px 17px;
+    }
+    .goal-stat-icon {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      color: var(--accent-ink, var(--accent));
+      background: rgba(var(--accent-rgb),0.12);
+      font-size: 17px;
+    }
+    .goal-stat:nth-child(2) .goal-stat-icon { color: var(--sav); background: rgba(96,165,250,0.12); }
+    .goal-stat:nth-child(3) .goal-stat-icon { color: var(--warn); background: rgba(251,191,36,0.12); }
+    .goal-stat-label { display: block; color: var(--text-muted); font-size: 11px; }
+    .goal-stat-value { display: block; margin-top: 1px; font: 600 16px var(--font-mono); }
+    .goals-section-heading { margin: 4px 0 -7px; }
+    .goals-section-heading h3 { font-size: 17px; }
+    .goals-section-heading span { color: var(--text-muted); font-size: 12px; }
+    .goals-card-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .goal-card { padding: 20px; --goal-color: var(--accent); }
+    .goal-card-top, .goal-card-name-row, .goal-card-total-row, .goal-card-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .goal-card-name-row { justify-content: flex-start; min-width: 0; }
+    .goal-card-icon { width: 42px; height: 42px; font-size: 19px; }
+    .goal-card-title { overflow: hidden; font-size: 15px; text-overflow: ellipsis; white-space: nowrap; }
+    .goal-card-category { margin-top: 2px; color: var(--text-muted); font-size: 11px; }
+    .goal-status {
+      flex: 0 0 auto;
+      padding: 4px 9px;
+      border: 1px solid rgba(var(--accent-rgb),0.2);
+      border-radius: 99px;
+      color: var(--accent-ink, var(--accent));
+      background: rgba(var(--accent-rgb),0.08);
+      font-size: 10px;
+      font-weight: 600;
+    }
+    .goal-status.goal-status-focus { color: var(--warn); border-color: rgba(251,191,36,0.2); background: rgba(251,191,36,0.08); }
+    .goal-card-total-row { align-items: baseline; margin-top: 20px; }
+    .goal-card-saved { font: 600 20px var(--font-mono); }
+    .goal-card-target { color: var(--text-muted); font-size: 11px; }
+    .goal-card-progress { margin-top: 9px; }
+    .goal-card-meta { margin-top: 15px; padding-top: 13px; border-top: 1px solid var(--glass-border); }
+    .goal-card-meta div { min-width: 0; }
+    .goal-card-meta span, .goal-card-meta strong { display: block; }
+    .goal-card-meta span { color: var(--text-muted); font-size: 10px; }
+    .goal-card-meta strong { margin-top: 3px; font-size: 12px; font-weight: 600; }
+
+    /* ── Health gauge ─────────────────────────────────────── */
+    .gauge-wrap { text-align: center; }
+    .gauge-wrap svg { width: 100%; max-width: 200px; }
+    .gauge-bg { fill: none; stroke: var(--bg-card-hover); stroke-width: 10; stroke-linecap: round; }
+    .gauge-fg { fill: none; stroke: var(--accent); stroke-width: 10; stroke-linecap: round;
+      stroke-dasharray: 157.1; stroke-dashoffset: 157.1;
+      transition: stroke-dashoffset 1.4s cubic-bezier(0.2,0.8,0.2,1); }
+    .gauge-score {
+      font-size: 48px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      display: block;
+      margin-top: -30px;
+      color: var(--accent-ink, var(--accent));
+    }
+    .gauge-label { font-size: 14px; font-weight: 600; color: var(--text-secondary); }
+    .gauge-desc { font-size: 12px; color: var(--text-muted); margin-top: 6px; line-height: 1.4; }
+
+    /* ── Transactions table ───────────────────────────────── */
+    .txn-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .txn-table th, .txn-table td { padding: 11px 8px; text-align: left; border-bottom: 1px solid var(--glass-border); }
+    .txn-table th { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
+    .txn-table tr:last-child td { border: none; }
+    .txn-table td.amt { text-align: right; font-family: var(--font-mono); font-weight: 600; }
+    .txn-pos { color: var(--inc); }
+    .txn-neg { color: var(--exp); }
+    .cat-badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--bg-card-hover);
+      color: var(--text-secondary);
+    }
+
+    /* ── Alerts & Loan ────────────────────────────────────── */
+    .alerts-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .alert-item {
+      padding: 11px 14px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-card-hover);
+      border-left: 3px solid var(--accent);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    .alert-item.alert-warn { border-color: var(--warn); }
+    .alert-item.alert-danger { border-color: var(--exp); }
+    .loan-panel {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--glass-border);
+    }
+    .loan-title { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.06em; }
+    .loan-desc { font-size: 13px; color: var(--text-secondary); margin-top: 6px; }
+    .loan-amount {
+      font-size: 26px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      color: var(--exp);
+      display: block;
+      margin: 4px 0 8px;
+    }
+    .loan-meta { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+    /* ── Footer note ──────────────────────────────────────── */
+    .footer-note { text-align: center; font-size: 12px; color: var(--text-muted); padding: 4px 0 8px; }
+
+    /* ── Animations ───────────────────────────────────────── */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .kpi-card:nth-child(1) { animation-delay: 0.05s; }
+    .kpi-card:nth-child(2) { animation-delay: 0.12s; }
+    .kpi-card:nth-child(3) { animation-delay: 0.19s; }
+    .kpi-card:nth-child(4) { animation-delay: 0.26s; }
+    .fade-in { animation: fadeInUp 0.6s ease both; }
+
+    /* ── Modal ────────────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      display: none; place-items: center;
+      background: rgba(2,15,13,0.7);
+      backdrop-filter: blur(8px);
+      z-index: 200;
+      padding: 16px;
+    }
+    .modal-overlay.open { display: grid; }
+    .modal-box {
+      width: min(460px, 100%);
+      background: rgba(4,20,18,0.95);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-xl);
+      padding: 28px;
+      animation: popIn 0.28s cubic-bezier(0.2,0.8,0.2,1);
+      backdrop-filter: blur(24px);
+    }
+    [data-theme="light"] .modal-box { background: rgba(240,237,228,0.97); }
+    @keyframes popIn { from { opacity:0; transform: translateY(16px) scale(0.97); } }
+    .modal-title { font-size: 20px; font-weight: 700; margin-bottom: 16px; }
+    .modal-tabs { display: flex; gap: 6px; margin-bottom: 20px; }
+    .modal-tab {
+      flex: 1; padding: 9px; border-radius: var(--radius-sm);
+      border: 1px solid var(--glass-border); background: transparent;
+      color: var(--text-secondary); font-size: 14px; font-weight: 500;
+      cursor: pointer; transition: all var(--transition); font-family: var(--font-sans);
+    }
+    .modal-tab.active { background: var(--accent); color: #020f0d; border-color: var(--accent); font-weight: 600; }
+    [data-theme="light"] .modal-tab.active { color: #322448; }
+    .modal-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin: 14px 0 5px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .modal-input, .modal-select {
+      width: 100%; padding: 10px 13px;
+      border-radius: var(--radius-sm); font-size: 14px; font-family: var(--font-sans);
+      background: var(--bg-card); border: 1px solid var(--glass-border);
+      color: var(--text-primary); transition: border-color var(--transition);
+    }
+    .modal-input:focus, .modal-select:focus { outline: none; border-color: var(--accent); }
+    .modal-select option { color: #004741; background: #F0EDE4; }
+    .modal-err { color: var(--exp); font-size: 13px; min-height: 18px; margin-top: 8px; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+    .modal-cancel {
+      background: transparent; border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm); padding: 10px 20px;
+      color: var(--text-secondary); cursor: pointer; font-family: var(--font-sans); font-size: 14px;
+      transition: all var(--transition);
+    }
+    .modal-cancel:hover { background: var(--bg-card); }
+    .modal-save {
+      background: linear-gradient(135deg, #00d4c8, #007a70);
+      border: none; border-radius: var(--radius-sm); padding: 10px 24px;
+      color: #F0EDE4; font-weight: 600; cursor: pointer; font-size: 14px;
+      font-family: var(--font-sans); transition: all var(--transition);
+      box-shadow: 0 4px 16px rgba(0,212,200,0.3);
+    }
+    .modal-save:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,212,200,0.4); }
+
+    /* ── Page sections ────────────────────────────────────── */
+    .page-section { display: none; }
+    .page-section.active { display: flex; flex-direction: column; gap: 22px; }
+    .coming-soon-wrap { display: grid; place-items: center; min-height: 60vh; }
+    .coming-soon-card {
+      text-align: center; padding: 60px 48px;
+      max-width: 440px; width: 100%;
+    }
+    .coming-soon-icon { font-size: 56px; margin-bottom: 20px; display: block; }
+    .coming-soon-title { font-size: 24px; font-weight: 700; margin-bottom: 10px; }
+    .coming-soon-text { color: var(--text-secondary); font-size: 15px; line-height: 1.6; }
+
+    /* ── Responsive ───────────────────────────────────────── */
+    @media (max-width: 1200px) {
+      .kpi-row { grid-template-columns: 1fr 1fr; }
+      .col-4, .col-5, .col-3, .col-7, .col-8 { grid-column: span 6; }
+    }
+    @media (max-width: 900px) {
+      .pft-app { grid-template-columns: minmax(0, 1fr); }
+      .sidebar { transform: translateX(-110%); transition: transform 0.3s ease; }
+      .sidebar.open { transform: translateX(0); }
+      .main-content { grid-column: 1; padding: 16px; }
+      .hamburger { display: flex; align-items: center; }
+      .col-4, .col-5, .col-3, .col-7, .col-8 { grid-column: span 12; }
+      .topbar-greeting h1 { font-size: 22px; }
+      .goals-overview { grid-template-columns: minmax(0, 1fr); }
+      .goal-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .goal-stat { grid-template-columns: 32px minmax(0, 1fr); padding: 12px; }
+      .goal-stat-icon { width: 32px; height: 32px; }
+    }
+    @media (max-width: 700px) {
+      .goals-card-grid { grid-template-columns: minmax(0, 1fr); }
+    }
+    @media (max-width: 540px) {
+      .kpi-row { grid-template-columns: 1fr; }
+      .kpi-featured .kpi-value { font-size: 32px; }
+      .goals-page-heading { align-items: flex-start; flex-direction: column; }
+      .goal-hero { min-height: 0; padding: 20px; gap: 12px; }
+      .goal-overall-ring { width: 86px; height: 86px; flex-basis: 86px; }
+      .goal-overall-ring::before { width: 68px; height: 68px; }
+      .goal-overall-ring span { font-size: 19px; }
+      .goal-stats { grid-template-columns: minmax(0, 1fr); }
+      .goal-stat { grid-template-columns: 38px minmax(0, 1fr); }
+      .goal-stat-icon { width: 38px; height: 38px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
+  </style>
+  <link rel="stylesheet" href="assets/css/pft-account.css">
+  <style>
+    .pft-app { display: block; min-height: 100vh; }
+    .sidebar.floating-dock {
+      position: fixed;
+      inset: 50% auto auto 18px;
+      z-index: 120;
+      width: auto;
+      max-height: calc(100vh - 32px);
+      overflow-x: hidden;
+      overflow-y: auto;
+      padding: 10px;
+      align-items: center;
+      gap: 5px;
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      background: rgba(3,14,11,.82);
+      box-shadow: 0 18px 48px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.08);
+      transform: translateY(-50%);
+      scrollbar-width: none;
+    }
+    [data-theme="light"] .sidebar.floating-dock { background: rgba(240,237,228,.88); }
+    .sidebar.floating-dock::-webkit-scrollbar { display: none; }
+    .floating-dock .nav-item {
+      position: relative;
+      display: grid;
+      place-items: center;
+      flex: 0 0 42px;
+      width: 42px;
+      height: 42px;
+      padding: 0;
+      border: 1px solid transparent;
+      border-radius: 15px;
+      color: var(--text-secondary);
+      text-align: center;
+      transition: color .2s ease, background .2s ease, border-color .2s ease, transform .2s ease;
+    }
+    .floating-dock .nav-item:hover,
+    .floating-dock .nav-item:focus-visible {
+      color: var(--text-primary);
+      background: rgba(var(--accent-rgb),.1);
+      border-color: rgba(var(--accent-rgb),.22);
+      outline: none;
+    }
+    .floating-dock .nav-item.active {
+      color: var(--v2-emerald-bright);
+      background: rgba(var(--accent-rgb),.16);
+      border-color: rgba(var(--accent-rgb),.3);
+      box-shadow: 0 0 20px rgba(var(--accent-rgb),.12);
+    }
+    .floating-dock .nav-item::before { display: none; }
+    .floating-dock .nav-item:hover .nav-icon,
+    .floating-dock .nav-item:focus-visible .nav-icon,
+    .floating-dock .nav-item.active .nav-icon {
+      animation: dockBounce .62s cubic-bezier(.2,.8,.3,1);
+    }
+    .floating-dock .nav-icon {
+      display: block;
+      width: 19px;
+      height: 19px;
+      font-size: 18px;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+    .dock-divider {
+      flex: 0 0 1px;
+      width: 26px;
+      height: 1px;
+      margin: 3px 0;
+      background: var(--glass-border);
+    }
+    @keyframes dockBounce {
+      0%, 100% { transform: translateY(0); }
+      35% { transform: translateY(-7px); }
+      65% { transform: translateY(1px); }
+    }
+    .v2-main {
+      width: 100%;
+      min-height: 100vh;
+      margin: 0;
+      padding: 30px clamp(22px,3.3vw,52px) 48px 94px;
+      gap: 25px;
+    }
+    .v2-main > .topbar { align-items: center; gap: 20px; }
+    .v2-main .topbar-greeting { min-width: 180px; }
+    .v2-main .topbar-greeting h1 { font-size: 24px; letter-spacing: -0.04em; }
+    .v2-main .topbar-greeting p { margin-top: 5px; font-size: 13px; }
+    .v2-main .auth-nav-btn, .v2-main .add-btn { min-height: 42px; border-radius: 13px; }
+    .v2-main .page-section.active { gap: 24px; }
+    .dashboard-intro, .zone-heading, .hero-bottom, .goals-zone-footer, .cashflow-chart-head, .chart-legend {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+    .dashboard-intro { margin: 1px 2px 0; }
+    .dashboard-intro h2 { margin-top: 5px; font-size: clamp(24px,3vw,34px); letter-spacing: -0.045em; }
+    .v2-eyebrow, .zone-kicker {
+      color: var(--v2-emerald-bright);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+    }
+    .live-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid var(--glass-border);
+      border-radius: 99px;
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .live-indicator i, .hero-pulse {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--v2-emerald);
+      box-shadow: 0 0 12px var(--v2-emerald);
+    }
+    .dashboard-zones { display: flex; flex-direction: column; gap: 24px; }
+    .feature-zones { display: flex; align-items: stretch; gap: 24px; }
+    .v2-zone {
+      position: relative;
+      min-width: 0;
+      overflow: hidden;
+      padding: 24px;
+      border: 1px solid var(--glass-border);
+      border-radius: 25px;
+      background:
+        radial-gradient(ellipse at 90% 0%, rgba(var(--accent-rgb),0.08), transparent 42%),
+        linear-gradient(145deg, rgba(10,38,30,0.84), rgba(4,20,16,0.78));
+      box-shadow: 0 18px 48px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.055);
+      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(16px);
+      animation: v2Rise .72s cubic-bezier(.2,.8,.2,1) both;
+      transition: transform .28s ease, border-color .28s ease, box-shadow .28s ease;
+    }
+    [data-theme="light"] .v2-zone {
+      background:
+        radial-gradient(ellipse at 90% 0%, rgba(var(--accent-rgb),0.075), transparent 42%),
+        linear-gradient(145deg, rgba(255,255,255,0.86), rgba(239,244,240,0.8));
+    }
+    .v2-zone:hover { transform: translateY(-4px); border-color: var(--glass-border-hover); box-shadow: 0 24px 58px rgba(0,0,0,0.27), inset 0 1px 0 rgba(255,255,255,0.07); }
+    .feature-zones .v2-zone:nth-child(2) { animation-delay: .08s; }
+    .dashboard-zones > .v2-zone:nth-child(2) { animation-delay: .08s; }
+    @keyframes v2Rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    .hero-zone { flex: 1.4 1 0; min-height: 430px; display: grid; grid-template-columns: minmax(190px,.82fr) minmax(0,1.18fr); grid-template-rows: 1fr auto; gap: 4px 12px; }
+    .hero-copy { position: relative; z-index: 2; align-self: center; min-width: 0; }
+    .zone-kicker { display: flex; align-items: center; gap: 10px; }
+    .hero-delta {
+      padding: 5px 8px;
+      border: 1px solid rgba(var(--accent-rgb),0.22);
+      border-radius: 99px;
+      background: rgba(var(--accent-rgb),0.1);
+      color: var(--v2-emerald-bright);
+      font-size: 10px;
+      letter-spacing: .02em;
+    }
+    .hero-balance {
+      display: block;
+      margin-top: 14px;
+      color: var(--text-primary);
+      font: 600 clamp(34px,4.2vw,54px)/1.08 var(--font-mono);
+      letter-spacing: -.075em;
+      white-space: nowrap;
+      text-shadow: 0 0 26px rgba(var(--accent-rgb),0.16);
+    }
+    .hero-caption { margin-top: 11px; color: var(--text-secondary); font-size: 12px; }
+    .hero-caption span { padding: 0 4px; color: var(--v2-gold); }
+    .hero-account-line { display: flex; align-items: center; gap: 10px; margin-top: 27px; color: var(--text-muted); font-size: 11px; }
+    .account-stack { display: flex; padding-left: 4px; }
+    .account-stack i {
+      display: grid;
+      place-items: center;
+      width: 22px;
+      height: 22px;
+      margin-left: -4px;
+      border: 1px solid rgba(var(--accent-rgb),0.36);
+      border-radius: 50%;
+      background: #0c362a;
+      color: var(--v2-emerald-bright);
+      font-size: 10px;
+      font-style: normal;
+      font-weight: 700;
+    }
+    .account-stack i:nth-child(2) { background: #312a16; color: var(--v2-gold); }
+    .account-stack i:nth-child(3) { background: #123026; }
+    .hero-stage { position: relative; min-width: 0; min-height: 240px; align-self: center; perspective: 900px; }
+    .hero-stage canvas, .health-visual canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+    .hero-stage canvas { z-index: 1; cursor: grab; }
+    .hero-stage canvas:active { cursor: grabbing; }
+    .hero-scene-caption { position: absolute; right: 3px; bottom: 1px; color: var(--text-muted); font-size: 8px; letter-spacing: .17em; }
+    .hero-card-fallback {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      display: flex;
+      width: min(292px,92%);
+      height: 178px;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 20px;
+      transform: translate(-50%,-50%) rotate(-7deg);
+      border: 1px solid rgba(115,255,205,.36);
+      border-radius: 19px;
+      background: linear-gradient(135deg,rgba(18,115,82,.86),rgba(4,34,27,.9) 58%,rgba(176,143,69,.65));
+      box-shadow: 0 20px 46px rgba(0,0,0,.4);
+    }
+    .fallback-brand { color: #e7fff5; font-size: 16px; font-weight: 700; }
+    .fallback-brand small { margin-left: 5px; color: #d7b76b; font-size: 8px; letter-spacing: .15em; }
+    .fallback-chip { width: 36px; height: 26px; border: 1px solid rgba(255,255,255,.55); border-radius: 6px; background: linear-gradient(135deg,#d9c785,#9e813c); }
+    .fallback-card-digits { color: rgba(255,255,255,.9); font: 12px var(--font-mono); letter-spacing: .06em; }
+    .fallback-card-type { position: absolute; right: 18px; bottom: 19px; color: #fff; font-size: 8px; letter-spacing: .16em; }
+    .hero-stage:not(.webgl-fallback) .hero-card-fallback { display: none; }
+    .hero-bottom {
+      grid-column: 1 / -1;
+      min-height: 34px;
+      padding-top: 12px;
+      border-top: 1px solid var(--glass-border);
+      color: var(--text-secondary);
+      font-size: 11px;
+    }
+    .hero-bottom > span { display: inline-flex; align-items: center; gap: 8px; }
+    .hero-pulse { display: inline-block; width: 6px; height: 6px; }
+    .text-action, .analytics-footer-action {
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: var(--v2-emerald-bright);
+      font: 600 11px var(--font-sans);
+      cursor: pointer;
+    }
+    .text-action:hover, .analytics-footer-action:hover { color: var(--v2-gold); }
+    .text-action span, .analytics-footer-action span { margin-left: 4px; }
+    .health-zone { flex: 1 1 0; min-height: 430px; display: flex; flex-direction: column; }
+    .zone-heading h2 { margin-top: 5px; font-size: 17px; letter-spacing: -.025em; }
+    .health-status {
+      padding: 6px 10px;
+      border: 1px solid rgba(var(--accent-rgb),0.22);
+      border-radius: 99px;
+      background: rgba(var(--accent-rgb),0.1);
+      color: var(--v2-emerald-bright);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .04em;
+    }
+    .health-visual { position: relative; flex: 1; min-height: 180px; margin: 3px 0 -2px; }
+    .health-visual canvas { z-index: 1; }
+    .health-fallback-ring {
+      position: absolute;
+      inset: 50% auto auto 50%;
+      width: 154px;
+      height: 154px;
+      transform: translate(-50%,-50%);
+      border: 13px solid rgba(var(--accent-rgb),0.15);
+      border-top-color: var(--v2-emerald);
+      border-right-color: var(--v2-emerald);
+      border-radius: 50%;
+      box-shadow: 0 0 28px rgba(var(--accent-rgb),0.2);
+    }
+    .health-visual:not(.webgl-fallback) .health-fallback-ring { display: none; }
+    .health-score-overlay { position: absolute; z-index: 2; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; }
+    .health-score-overlay span { color: var(--text-primary); font: 600 44px/1 var(--font-mono); text-shadow: 0 0 18px rgba(var(--accent-rgb),0.26); }
+    .health-score-overlay small { margin-top: 7px; color: var(--text-muted); font-size: 8px; font-weight: 700; letter-spacing: .16em; }
+    .health-note { color: var(--text-secondary); font-size: 11px; line-height: 1.55; }
+    .health-footer { display: flex; justify-content: space-between; gap: 10px; margin-top: 13px; padding-top: 12px; border-top: 1px solid var(--glass-border); color: var(--text-muted); font-size: 10px; }
+    .health-footer strong { color: var(--v2-gold); font-weight: 600; }
+    .analytics-zone { width: 100%; min-height: 360px; display: flex; flex-direction: column; }
+    .analytics-heading { align-items: flex-start; margin-bottom: 20px; }
+    .metric-tabs { display: flex; gap: 3px; padding: 4px; border: 1px solid var(--glass-border); border-radius: 12px; background: rgba(0,0,0,.12); }
+    .metric-tab {
+      padding: 7px 10px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--text-muted);
+      font: 600 10px var(--font-sans);
+      white-space: nowrap;
+      cursor: pointer;
+      transition: background .2s ease, color .2s ease, box-shadow .2s ease;
+    }
+    .metric-tab:hover { color: var(--text-primary); }
+    .metric-tab.active { background: rgba(var(--accent-rgb),0.15); color: var(--v2-emerald-bright); box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb),0.16); }
+    .metric-panel { flex: 1; min-width: 0; }
+    .metric-panel[hidden] { display: none; }
+    .snapshot-metrics { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 10px; }
+    .snapshot-metric { display: flex; min-width: 0; flex-direction: column; padding: 12px 13px; border: 1px solid var(--glass-border); border-radius: 13px; background: rgba(0,0,0,.12); }
+    .snapshot-metric > span { color: var(--text-muted); font-size: 10px; font-weight: 600; }
+    .snapshot-metric strong { overflow: hidden; margin-top: 6px; color: var(--text-primary); font: 600 clamp(16px,2vw,23px)/1.2 var(--font-mono); letter-spacing: -.05em; text-overflow: ellipsis; white-space: nowrap; }
+    .snapshot-metric small { margin-top: 6px; color: var(--text-muted); font-size: 9px; white-space: nowrap; }
+    .income-metric strong { color: var(--v2-emerald-bright); }
+    [data-theme="light"] .income-metric strong { color: var(--inc); }
+    .expense-metric strong { color: var(--v2-red); }
+    .savings-metric strong { color: #7eb2ff; }
+    .cashflow-chart { margin-top: 20px; }
+    .cashflow-chart-head { color: var(--text-muted); font-size: 8px; font-weight: 700; letter-spacing: .1em; }
+    .cashflow-bars { display: grid; height: 91px; grid-template-columns: repeat(6,minmax(0,1fr)); gap: 13px; align-items: end; margin-top: 10px; padding: 0 4px; }
+    .cashflow-month { display: flex; height: 100%; flex-direction: column; align-items: center; justify-content: flex-end; gap: 7px; color: var(--text-muted); font-size: 8px; letter-spacing: .04em; }
+    .cashflow-month i { position: relative; display: block; width: min(24px,100%); height: 70px; border-radius: 8px; background: rgba(255,255,255,.035); overflow: hidden; }
+    .cashflow-month i::before, .cashflow-month i::after { position: absolute; bottom: 0; left: 0; width: 100%; content: ""; border-radius: 6px 6px 2px 2px; }
+    .cashflow-month i::before { height: var(--income-height); background: linear-gradient(180deg,var(--v2-emerald-bright),rgba(var(--accent-rgb),.35)); }
+    [data-theme="light"] .cashflow-month i::before { background: linear-gradient(180deg,var(--inc),rgba(var(--inc-rgb),.35)); }
+    .cashflow-month i::after { left: 42%; width: 58%; height: var(--expense-height); background: linear-gradient(180deg,var(--v2-red),rgba(var(--v2-red-rgb),.36)); }
+    .cashflow-month.current i { box-shadow: 0 0 16px rgba(var(--accent-rgb),.12); }
+    .cashflow-month.current { color: var(--text-primary); }
+    .chart-legend { justify-content: flex-start; gap: 18px; margin-top: 9px; color: var(--text-muted); font-size: 9px; }
+    .chart-legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .chart-legend i { width: 7px; height: 7px; border-radius: 50%; }
+    .legend-income { background: var(--v2-emerald); }
+    [data-theme="light"] .legend-income { background: var(--inc); }
+    .legend-expense { background: var(--v2-red); }
+    .analytics-footer-action { align-self: flex-end; margin-top: 15px; padding-top: 11px; border-top: 1px solid var(--glass-border); }
+    .panel-summary { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 3px 0 17px; color: var(--text-secondary); font-size: 11px; }
+    .panel-summary strong { color: var(--text-primary); font: 600 15px var(--font-mono); text-align: right; }
+    .panel-summary small { color: var(--text-muted); font: 10px var(--font-sans); }
+    .category-list, .budget-list { display: flex; flex-direction: column; gap: 12px; }
+    .category-row, .budget-row-v2 { display: grid; grid-template-columns: minmax(78px,1fr) minmax(80px,3fr) auto; align-items: center; gap: 10px; color: var(--text-secondary); font-size: 10px; }
+    .category-label, .budget-label { display: flex; align-items: center; gap: 7px; overflow: hidden; white-space: nowrap; }
+    .category-dot { width: 7px; height: 7px; flex: 0 0 7px; border-radius: 50%; background: var(--category-color); }
+    .category-track, .budget-track { height: 6px; overflow: hidden; border-radius: 99px; background: rgba(255,255,255,.07); }
+    .category-track span, .budget-track span { display: block; width: var(--bar-width); height: 100%; border-radius: inherit; background: var(--category-color,var(--v2-emerald)); }
+    .category-amount, .budget-amount { color: var(--text-secondary); font: 10px var(--font-mono); white-space: nowrap; }
+    .budget-row-v2.over-budget .budget-amount { color: var(--v2-red); }
+    .goals-zone { width: 100%; min-height: 290px; display: flex; flex-direction: column; }
+    .goals-zone-intro { margin: 9px 0 16px; color: var(--text-muted); font-size: 11px; }
+    .dashboard-goal-list { display: grid; flex: 1; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+    .dashboard-goal-row {
+      display: grid;
+      grid-template-columns: 39px minmax(0,1fr);
+      align-items: center;
+      gap: 11px;
+      width: 100%;
+      padding: 12px;
+      border: 1px solid transparent;
+      border-radius: 14px;
+      background: rgba(255,255,255,.025);
+      color: inherit;
+      font: inherit;
+      text-align: left;
+      text-decoration: none;
+      cursor: pointer;
+      transition: border-color .2s ease, background .2s ease, transform .2s ease;
+    }
+    .dashboard-goal-row:hover { transform: translateX(3px); border-color: var(--glass-border); background: rgba(var(--accent-rgb),.055); }
+    .dashboard-goal-icon { display: grid; place-items: center; width: 39px; height: 39px; border: 1px solid rgba(var(--accent-rgb),.23); border-radius: 12px; background: rgba(var(--accent-rgb),.1); color: var(--v2-emerald-bright); font-size: 17px; }
+    .dashboard-goal-copy { min-width: 0; }
+    .dashboard-goal-heading, .dashboard-goal-amount { display: flex; justify-content: space-between; gap: 8px; }
+    .dashboard-goal-heading { font-size: 11px; }
+    .dashboard-goal-heading strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .dashboard-goal-heading span { color: var(--v2-emerald-bright); font-weight: 700; }
+    .dashboard-goal-amount { margin: 3px 0 7px; color: var(--text-muted); font-size: 9px; }
+    .dashboard-goal-track, .goal-progress-track { display: block; height: 5px; overflow: hidden; border-radius: 99px; background: rgba(255,255,255,.08); }
+    .dashboard-goal-track span, .goal-progress-track span { display: block; width: var(--goal-progress); height: 100%; border-radius: inherit; background: linear-gradient(90deg,var(--goal-color,var(--v2-emerald)),var(--v2-emerald-bright)); }
+    .goals-zone-footer { justify-content: flex-start; margin-top: 13px; padding-top: 12px; border-top: 1px solid var(--glass-border); color: var(--text-muted); font-size: 10px; }
+    .goal-footer-icon { color: var(--v2-gold); font-size: 13px; }
+    .v2-main .footer-note { color: var(--text-muted); }
+    [data-theme="light"] .v2-zone { color: #173a30; }
+    [data-theme="light"] .v2-zone .hero-card-fallback { color: #fff; }
+    @media (max-width: 1100px) {
+      .feature-zones { flex-direction: column; }
+      .hero-zone, .health-zone { flex: 0 0 auto; min-height: 400px; }
+      .hero-zone { grid-template-columns: minmax(0,1fr) minmax(0,1fr); grid-template-rows: 1fr auto; }
+      .hero-copy { align-self: center; }
+      .hero-stage { min-height: 220px; }
+      .hero-account-line { margin-top: 12px; }
+    }
+    @media (max-width: 900px) {
+      .sidebar.floating-dock {
+        inset: auto auto 12px 50%;
+        width: auto;
+        max-height: none;
+        display: grid;
+        grid-template-columns: repeat(7, 42px);
+        grid-auto-rows: 42px;
+        justify-content: center;
+        overflow: visible;
+        transform: translateX(-50%);
+      }
+      .dock-divider { display: none; }
+      .v2-main { width: 100%; margin: 0; padding: 24px 20px 150px; }
+      .v2-main > .topbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 14px;
+      }
+      .v2-main .topbar-greeting { flex: 1 1 100%; min-width: 0; }
+      .v2-main .topbar-controls { width: 100%; justify-content: flex-end; }
+      .feature-zones { gap: 16px; }
+      .hero-zone, .health-zone { min-height: 390px; }
+      .hero-stage { min-height: 195px; }
+      .analytics-zone { min-height: 350px; }
+      .goals-zone { min-height: 290px; }
+    }
+    @media (max-width: 560px) {
+      .v2-main { padding: 20px 16px 150px; gap: 20px; }
+      .v2-main > .topbar { display: grid; grid-template-columns: minmax(0,1fr); align-items: start; gap: 12px; }
+      .v2-main .topbar-greeting { grid-column: 1; width: 100%; min-width: 0; }
+      .v2-main .topbar-greeting h1 { font-size: 20px; }
+      .v2-main .topbar-greeting p { font-size: 11px; }
+      .v2-main .topbar-controls { display: grid; grid-column: 1; grid-template-columns: 1fr 1fr; width: 100%; gap: 6px; }
+      #page-transactions .topbar-controls > input { min-width: 0 !important; }
+      #page-transactions .category-picker { width: 100%; min-width: 0; }
+      .v2-main .auth-nav-btn, .v2-main .add-btn { min-height: 36px; padding: 7px 9px; font-size: 11px; }
+      .v2-main .topbar-controls .add-btn { grid-column: 1 / -1; width: 100%; }
+      .dashboard-intro { align-items: flex-start; }
+      .dashboard-intro h2 { font-size: 25px; }
+      .live-indicator { padding: 7px 9px; font-size: 9px; }
+      .v2-zone { padding: 18px; border-radius: 20px; }
+      .hero-zone { grid-template-columns: minmax(0,1fr); grid-template-rows: auto 190px auto; }
+      .hero-balance { font-size: clamp(35px,10vw,48px); }
+      .hero-account-line { margin-top: 11px; }
+      .hero-bottom { align-items: flex-start; flex-direction: column; }
+      .health-zone { min-height: 350px; }
+      .dashboard-goal-list { grid-template-columns: minmax(0,1fr); }
+      .analytics-heading { flex-direction: column; align-items: stretch; }
+      .metric-tabs { justify-content: space-between; }
+      .metric-tab { flex: 1; padding-inline: 5px; }
+      .snapshot-metrics { gap: 6px; }
+      .snapshot-metric { padding: 10px 8px; }
+      .snapshot-metric strong { font-size: clamp(14px,4vw,19px); }
+      .snapshot-metric small { font-size: 8px; }
+      .category-row, .budget-row-v2 { grid-template-columns: minmax(75px,1fr) minmax(45px,2fr) auto; gap: 7px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .v2-zone, .sidebar .nav-item, .dashboard-goal-row { animation: none; transition: none; }
+      .v2-zone:hover, .dashboard-goal-row:hover { transform: none; }
+    }
+    @media (max-width: 360px) {
+      #page-transactions .category-trigger { gap: 6px; padding-inline: 8px; font-size: 12px; }
+      .sidebar.floating-dock {
+        grid-template-columns: repeat(7, 36px);
+        grid-auto-rows: 36px;
+        gap: 4px;
+        padding: 8px;
+      }
+      .floating-dock .nav-item { flex-basis: 36px; width: 36px; height: 36px; border-radius: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════
+     APP SHELL
+══════════════════════════════════════════════════════════ -->
+<div class="pft-app">
+
+  <nav class="sidebar floating-dock" id="app-sidebar" aria-label="Primary navigation">
+    <button class="nav-item active" type="button" data-page="dashboard" aria-label="Dashboard" title="Dashboard" aria-current="page"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="5" rx="2"/><rect x="13" y="10" width="8" height="11" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/></svg></button>
+    <button class="nav-item" type="button" data-page="transactions" aria-label="Transactions" title="Transactions"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 10h18M7 15h4"/></svg></button>
+    <button class="nav-item" type="button" data-page="accounts" aria-label="Accounts" title="Accounts"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 9 9-5 9 5M5 10v9m5-9v9m4-9v9m5-9v9M3 21h18M4 10h16"/></svg></button>
+    <button class="nav-item" type="button" data-page="budgets" aria-label="Budgets" title="Budgets"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10m5 10V4m5 16v-7m5 7V7M2 20h20"/></svg></button>
+    <button class="nav-item" type="button" data-page="goals" aria-label="Savings Goals" title="Savings Goals"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg></button>
+    <button class="nav-item" type="button" data-page="loans" aria-label="Loans &amp; EMI" title="Loans &amp; EMI"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-6v-7h-4v7H4a1 1 0 0 1-1-1z"/></svg></button>
+    <button class="nav-item" type="button" data-page="subscriptions" aria-label="Subscriptions" title="Subscriptions"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.6 9A7 7 0 0 1 18 6l2 2M4 16l2 2a7 7 0 0 0 12.4-3"/></svg></button>
+    <button class="nav-item" type="button" data-page="insights" aria-label="Insights" title="Insights"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5M8 11l2 2 4-4"/></svg></button>
+    <button class="nav-item" type="button" data-page="reports" aria-label="Reports" title="Reports"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V12m5 8V5m5 15v-6m5 6V3M2 20h20"/></svg></button>
+    <button class="nav-item" type="button" data-page="notifications" aria-label="Notifications" title="Notifications"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9m-8 12h4"/></svg></button>
+    <span class="dock-divider" aria-hidden="true"></span>
+    <button class="nav-item" type="button" data-page="profile" aria-label="Profile" title="Profile"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></button>
+    <button class="nav-item" type="button" data-page="settings" aria-label="Settings" title="Settings"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1 1.4 1.1-1.4 2.4-1.7-.7a8 8 0 0 1-1.7 1l-.3 1.8h-2.8l-.3-1.8a8 8 0 0 1-1.7-1l-1.7.7-1.4-2.4 1.4-1.1a7 7 0 0 1 0-2l-1.4-1.1 1.4-2.4 1.7.7a8 8 0 0 1 1.7-1l.3-1.8h2.8l.3 1.8a8 8 0 0 1 1.7 1l1.7-.7 1.4 2.4-1.4 1.1a7 7 0 0 1 0 2Z"/></svg></button>
+    <a class="nav-item" href="signin.html" aria-label="Log Out" title="Log Out"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5m5 5H3"/><path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7"/></svg></a>
+  </nav>
+
+  <!-- ── Main content ────────────────────────────────────── -->
+  <main class="main-content v2-main">
+
+    <!-- Top Bar -->
+    <div class="topbar">
+      <div class="topbar-greeting">
+        <h1>Your dashboard</h1>
+        <p>Your financial picture, with a little more clarity.</p>
+      </div>
+      <div class="topbar-controls">
+        <a class="auth-nav-btn auth-nav-btn-secondary" href="signin.html">Sign in</a>
+        <a class="auth-nav-btn auth-nav-btn-primary" href="signup.html">Sign up</a>
+        <button class="add-btn" id="add-txn-btn">+ Add Transaction</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════ DASHBOARD PAGE ══════════════════ -->
+    <section class="page-section active" id="page-dashboard">
+      <header class="dashboard-intro">
+        <div>
+          <p class="v2-eyebrow">ARTHA / PERSONAL FINANCE</p>
+          <h2>Money, in perspective.</h2>
+        </div>
+        <span class="live-indicator"><i aria-hidden="true"></i> Your overview</span>
+      </header>
+
+      <div class="dashboard-zones">
+        <div class="feature-zones">
+        <article class="glass-card v2-zone hero-zone" aria-labelledby="balance-title">
+          <div class="hero-copy">
+            <div class="zone-kicker">TOTAL BALANCE <span class="hero-delta">+4.2%</span></div>
+            <h2 id="balance-title" class="hero-balance" data-count-value="248560">₹0</h2>
+            <p class="hero-caption">Across 4 accounts <span aria-hidden="true">·</span> Updated just now</p>
+            <div class="hero-account-line">
+              <span class="account-stack" aria-hidden="true"><i>₹</i><i>₹</i><i>₹</i></span>
+              <span>Everyday money, at a glance</span>
+            </div>
+          </div>
+          <div class="hero-stage" id="hero-stage">
+            <div class="hero-card-fallback" aria-hidden="true">
+              <span class="fallback-brand">ARTHA <small>PREMIUM</small></span>
+              <span class="fallback-chip"></span>
+              <span class="fallback-card-digits">•••• &nbsp; •••• &nbsp; •••• &nbsp; 4082</span>
+              <span class="fallback-card-type">DEBIT</span>
+            </div>
+            <canvas id="hero-canvas" role="img" aria-label="Interactive 3D frosted-glass debit card with orbiting gold and silver coins"></canvas>
+            <span class="hero-scene-caption" aria-hidden="true">YOUR EVERYDAY ACCOUNT</span>
+          </div>
+          <div class="hero-bottom">
+            <span><i class="hero-pulse" aria-hidden="true"></i> Your balance is looking steady</span>
+            <button type="button" class="text-action" id="hero-add-transaction">+ Add transaction <span aria-hidden="true">↗</span></button>
+          </div>
+        </article>
+
+        <article class="glass-card v2-zone health-zone" id="health-zone" aria-labelledby="health-title">
+          <div class="zone-heading">
+            <div><p class="v2-eyebrow">WELLNESS CHECK</p><h2 id="health-title">Financial health</h2></div>
+            <span class="health-status">Good</span>
+          </div>
+          <div class="health-visual">
+            <div class="health-fallback-ring" aria-hidden="true"></div>
+            <canvas id="health-canvas" role="img" aria-label="Rotating 3D financial health ring with ambient particles"></canvas>
+            <div class="health-score-overlay">
+              <span id="health-score" data-count-value="72">0</span>
+              <small>OUT OF 100</small>
+            </div>
+          </div>
+          <p class="health-note">A solid foundation. Keep building your emergency reserve to strengthen your score.</p>
+          <div class="health-footer"><span>Emergency reserve</span><strong>In progress</strong></div>
+        </article>
+        </div>
+
+        <article class="glass-card v2-zone analytics-zone" id="analytics-zone" aria-labelledby="analytics-title">
+          <div class="zone-heading analytics-heading">
+            <div><p class="v2-eyebrow">YOUR MONEY, MOVING</p><h2 id="analytics-title">Financial snapshot</h2></div>
+            <div class="metric-tabs" role="tablist" aria-label="Financial metrics">
+              <button type="button" class="metric-tab active" id="tab-cashflow" role="tab" aria-selected="true" aria-controls="panel-cashflow" data-metric-tab="cashflow">Cash flow</button>
+              <button type="button" class="metric-tab" id="tab-spending" role="tab" aria-selected="false" aria-controls="panel-spending" data-metric-tab="spending" tabindex="-1">Spending</button>
+              <button type="button" class="metric-tab" id="tab-budgets" role="tab" aria-selected="false" aria-controls="panel-budgets" data-metric-tab="budgets" tabindex="-1">Budgets</button>
+            </div>
+          </div>
+          <div class="metric-panel" id="panel-cashflow" role="tabpanel" aria-labelledby="tab-cashflow" data-metric-panel="cashflow">
+            <div class="snapshot-metrics">
+              <div class="snapshot-metric income-metric"><span>Income</span><strong id="k1" data-count-value="85000">₹0</strong><small>+4% vs last month</small></div>
+              <div class="snapshot-metric expense-metric"><span>Expenses</span><strong id="k2" data-count-value="46320">₹0</strong><small>−6% vs last month</small></div>
+              <div class="snapshot-metric savings-metric"><span>Net savings</span><strong id="k3" data-count-value="38680">₹0</strong><small>45% savings rate</small></div>
+            </div>
+            <div class="cashflow-chart" role="img" aria-label="Income remains above expenses over the last six months">
+              <div class="cashflow-chart-head"><span>INCOME VS EXPENSES</span><span>LAST 6 MONTHS</span></div>
+              <div class="cashflow-bars" aria-hidden="true">
+                <div class="cashflow-month"><i style="--income-height:74%;--expense-height:43%"></i><span>JUN</span></div>
+                <div class="cashflow-month"><i style="--income-height:80%;--expense-height:48%"></i><span>JUL</span></div>
+                <div class="cashflow-month"><i style="--income-height:77%;--expense-height:44%"></i><span>AUG</span></div>
+                <div class="cashflow-month"><i style="--income-height:84%;--expense-height:50%"></i><span>SEP</span></div>
+                <div class="cashflow-month"><i style="--income-height:84%;--expense-height:50%"></i><span>OCT</span></div>
+                <div class="cashflow-month current"><i style="--income-height:90%;--expense-height:47%"></i><span>NOV</span></div>
+              </div>
+              <div class="chart-legend"><span><i class="legend-income"></i>Income</span><span><i class="legend-expense"></i>Expenses</span></div>
+            </div>
+          </div>
+          <div class="metric-panel" id="panel-spending" role="tabpanel" aria-labelledby="tab-spending" data-metric-panel="spending" hidden>
+            <div class="panel-summary"><span>Top spending categories</span><strong>₹46,320 <small>total expenses</small></strong></div>
+            <div class="category-list" id="category-list"></div>
+          </div>
+          <div class="metric-panel" id="panel-budgets" role="tabpanel" aria-labelledby="tab-budgets" data-metric-panel="budgets" hidden>
+            <div class="panel-summary"><span>Monthly budget health</span><strong>4 <small>categories tracked</small></strong></div>
+            <div class="budget-list" id="budget-list"></div>
+          </div>
+          <button type="button" class="analytics-footer-action" data-navigate="transactions">View transactions <span aria-hidden="true">↗</span></button>
+        </article>
+
+        <article class="glass-card v2-zone goals-zone" id="goals-zone" aria-labelledby="goals-title">
+          <div class="zone-heading">
+            <div><p class="v2-eyebrow">MILESTONES IN MOTION</p><h2 id="goals-title">Savings goals</h2></div>
+            <button type="button" class="text-action" data-navigate="goals">View all <span aria-hidden="true">↗</span></button>
+          </div>
+          <p class="goals-zone-intro">Small, consistent steps are moving you closer.</p>
+          <div class="dashboard-goal-list" id="dashboard-goals"></div>
+          <div class="goals-zone-footer"><span class="goal-footer-icon" aria-hidden="true">✦</span><span>Keep your momentum going</span></div>
+        </article>
+      </div>
+      <p class="footer-note">Financial health and forecasts are informational only, not financial advice.</p>
+    </section><!-- /page-dashboard -->
+
+
+    <!-- ══════════════════ OTHER PAGES ══════════════════════ -->
+
+    <!-- Transactions -->
+    <section class="page-section" id="page-transactions">
+      <div class="topbar" style="margin-bottom:0">
+        <h2 style="font-size:22px;font-weight:700">Transactions</h2>
+        <div class="topbar-controls">
+          <input type="text" class="period-select" placeholder="🔍 Search transactions…" style="min-width:200px">
+          <div class="category-picker" id="transaction-category-picker">
+            <button type="button" class="category-trigger" id="transaction-category-trigger"
+              aria-label="Filter transactions by category" aria-haspopup="listbox" aria-expanded="false"
+              aria-controls="transaction-category-menu">
+              <span class="category-value">All categories</span>
+              <svg class="category-chevron" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="m5 7.5 5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <div class="category-menu" id="transaction-category-menu" role="listbox" aria-label="Transaction categories" hidden>
+              <button type="button" class="category-option" role="option" data-category="" data-label="All categories" aria-selected="true" tabindex="-1">
+                <span>All categories</span><span class="category-option-check" aria-hidden="true">✓</span>
+              </button>
+              <button type="button" class="category-option" role="option" data-category="Food" data-label="Food" aria-selected="false" tabindex="-1">
+                <span>Food</span><span class="category-option-check" aria-hidden="true">✓</span>
+              </button>
+              <button type="button" class="category-option" role="option" data-category="Rent" data-label="Rent" aria-selected="false" tabindex="-1">
+                <span>Rent</span><span class="category-option-check" aria-hidden="true">✓</span>
+              </button>
+              <button type="button" class="category-option" role="option" data-category="Transport" data-label="Transport" aria-selected="false" tabindex="-1">
+                <span>Transport</span><span class="category-option-check" aria-hidden="true">✓</span>
+              </button>
+              <button type="button" class="category-option" role="option" data-category="Shopping" data-label="Shopping" aria-selected="false" tabindex="-1">
+                <span>Shopping</span><span class="category-option-check" aria-hidden="true">✓</span>
+              </button>
+              <button type="button" class="category-option" role="option" data-category="Bills" data-label="Bills" aria-selected="false" tabindex="-1">
+                <span>Bills</span><span class="category-option-check" aria-hidden="true">✓</span>
+              </button>
+              <button type="button" class="category-option" role="option" data-category="Salary" data-label="Salary" aria-selected="false" tabindex="-1">
+                <span>Salary</span><span class="category-option-check" aria-hidden="true">✓</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="glass-card card-pad">
+        <table class="txn-table">
+          <thead>
+            <tr>
+              <th>Date</th><th>Description</th><th>Category</th><th>Account</th>
+              <th style="text-align:right">Amount</th>
+            </tr>
+          </thead>
+          <tbody id="txn-all-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Accounts -->
+    <section class="page-section" id="page-accounts">
+      <div class="coming-soon-wrap">
+        <div class="glass-card coming-soon-card">
+          <span class="coming-soon-icon">🏦</span>
+          <div class="coming-soon-title">Accounts</div>
+          <div class="coming-soon-text">Manage your bank accounts, UPI IDs, and credit cards. Net worth tracking and account linking coming soon.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Budgets -->
+    <section class="page-section" id="page-budgets">
+      <div class="coming-soon-wrap">
+        <div class="glass-card coming-soon-card">
+          <span class="coming-soon-icon">📋</span>
+          <div class="coming-soon-title">Budget Planner</div>
+          <div class="coming-soon-text">Create, edit, and track monthly budgets per category. Smart suggestions based on your spending patterns coming soon.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Goals -->
+    <section class="page-section" id="page-goals">
+      <header class="goals-page-heading">
+        <div>
+          <p class="goals-eyebrow">Plan with purpose</p>
+          <p class="goals-page-description">A clear view of what you’re building toward and how far you’ve come.</p>
+        </div>
+        <span class="goal-status">2 goals in progress</span>
+      </header>
+
+      <div class="goals-overview">
+        <article class="glass-card goal-hero">
+          <div class="goal-hero-copy">
+            <span class="goal-hero-label">Your savings momentum</span>
+            <strong class="goal-hero-total" id="goal-saved-total">₹0</strong>
+            <p class="goal-hero-target">saved toward <strong id="goal-target-total">₹0</strong></p>
+            <div class="goal-hero-progress">
+              <div class="goal-progress-track" role="progressbar" id="goal-overall-progress"
+                aria-label="Overall savings goals progress" aria-valuemin="0" aria-valuemax="100">
+                <span></span>
+              </div>
+              <div class="goal-hero-foot">
+                <span id="goal-progress-label">0% of your combined target</span>
+                <span id="goal-remaining">₹0 to go</span>
+              </div>
+            </div>
+          </div>
+          <div class="goal-overall-ring" id="goal-overall-ring" role="img" aria-label="Overall goal progress">
+            <span id="goal-progress-number">0%</span>
+          </div>
+        </article>
+        <div class="goal-stats">
+          <article class="glass-card goal-stat">
+            <span class="goal-stat-icon" aria-hidden="true">🎯</span>
+            <div><span class="goal-stat-label">Active goals</span><strong class="goal-stat-value" id="goal-active-count">0</strong></div>
+          </article>
+          <article class="glass-card goal-stat">
+            <span class="goal-stat-icon" aria-hidden="true">↗</span>
+            <div><span class="goal-stat-label">Planned monthly savings</span><strong class="goal-stat-value" id="goal-monthly-total">₹0</strong></div>
+          </article>
+          <article class="glass-card goal-stat">
+            <span class="goal-stat-icon" aria-hidden="true">✓</span>
+            <div><span class="goal-stat-label">On track</span><strong class="goal-stat-value" id="goal-on-track-count">0</strong></div>
+          </article>
+        </div>
+      </div>
+
+      <div class="goals-section-heading">
+        <h3>Your goals</h3>
+        <span>Progress updates at a glance</span>
+      </div>
+      <div class="goals-card-grid" id="goal-cards"></div>
+    </section>
+
+    <!-- Loans -->
+    <section class="page-section" id="page-loans">
+      <div class="coming-soon-wrap">
+        <div class="glass-card coming-soon-card">
+          <span class="coming-soon-icon">🏠</span>
+          <div class="coming-soon-title">Loans &amp; EMI Tracker</div>
+          <div class="coming-soon-text">Track home loans, personal loans, and EMI schedules. Amortization charts, prepayment calculator, and due-date reminders coming soon.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Subscriptions -->
+    <section class="page-section" id="page-subscriptions">
+      <div class="coming-soon-wrap">
+        <div class="glass-card coming-soon-card">
+          <span class="coming-soon-icon">🔄</span>
+          <div class="coming-soon-title">Subscriptions</div>
+          <div class="coming-soon-text">Track recurring subscriptions, spot unused services, and get renewal reminders. Total monthly subscription spend at a glance.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Insights -->
+    <section class="page-section" id="page-insights">
+      <div class="coming-soon-wrap">
+        <div class="glass-card coming-soon-card">
+          <span class="coming-soon-icon">🔍</span>
+          <div class="coming-soon-title">AI Insights</div>
+          <div class="coming-soon-text">Personalized financial insights powered by AI. Spending anomaly detection, savings opportunities, and monthly financial reports coming soon.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Reports -->
+    <section class="page-section" id="page-reports">
+      <div class="coming-soon-wrap">
+        <div class="glass-card coming-soon-card">
+          <span class="coming-soon-icon">📈</span>
+          <div class="coming-soon-title">Reports</div>
+          <div class="coming-soon-text">Detailed financial reports with export to PDF/CSV. Year-on-year comparisons, tax summaries, and custom date-range analysis.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Notifications -->
+    <section class="page-section" id="page-notifications">
+      <div class="coming-soon-wrap">
+        <div class="glass-card coming-soon-card">
+          <span class="coming-soon-icon">🔔</span>
+          <div class="coming-soon-title">Notifications</div>
+          <div class="coming-soon-text">Budget alerts, bill reminders, and goal milestones. Configure push notifications, email digests, and custom alert thresholds.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Profile -->
+    <section class="page-section" id="page-profile">
+      <div class="account-view">
+        <header class="account-heading">
+          <div class="account-eyebrow">ACCOUNT / PROFILE</div>
+          <h2>Your profile</h2>
+          <p>Review the personal and account information available in this workspace.</p>
+        </header>
+
+        <div class="profile-banner glass-card">
+          <div class="profile-avatar-large" aria-hidden="true">NJ</div>
+          <div class="profile-banner-copy">
+            <span class="profile-overline">PERSONAL PROFILE</span>
+            <h3>Niranjan</h3>
+            <p>Premium Plan <span aria-hidden="true">·</span> Personal finance workspace</p>
+          </div>
+          <span class="profile-readonly">View only</span>
+        </div>
+
+        <div class="profile-grid">
+          <section class="glass-card profile-card" aria-labelledby="profile-contact-title">
+            <div class="account-card-heading">
+              <span class="account-card-icon" aria-hidden="true">✉</span>
+              <div>
+                <h3 id="profile-contact-title">Contact details</h3>
+                <p>Information associated with your profile</p>
+              </div>
+            </div>
+            <dl class="profile-details">
+              <div class="profile-detail">
+                <dt>Display name</dt>
+                <dd>Niranjan</dd>
+              </div>
+              <div class="profile-detail">
+                <dt>Email address</dt>
+                <dd class="profile-unavailable">Not connected in this preview</dd>
+              </div>
+              <div class="profile-detail">
+                <dt>Phone number</dt>
+                <dd class="profile-unavailable">Not provided</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section class="glass-card profile-card" aria-labelledby="profile-account-title">
+            <div class="account-card-heading">
+              <span class="account-card-icon" aria-hidden="true">◈</span>
+              <div>
+                <h3 id="profile-account-title">Account overview</h3>
+                <p>Key details about your Artha workspace</p>
+              </div>
+            </div>
+            <dl class="profile-details">
+              <div class="profile-detail">
+                <dt>Plan</dt>
+                <dd>Premium Plan</dd>
+              </div>
+              <div class="profile-detail">
+                <dt>Preferred currency</dt>
+                <dd>Indian Rupee (INR)</dd>
+              </div>
+              <div class="profile-detail">
+                <dt>Profile access</dt>
+                <dd>View only</dd>
+              </div>
+            </dl>
+          </section>
+        </div>
+
+        <p class="account-demo-note">This project is a local interface preview. Account details are not connected to a user service.</p>
+      </div>
+    </section>
+
+    <!-- Settings -->
+    <section class="page-section" id="page-settings">
+      <div class="account-view">
+        <header class="account-heading">
+          <div class="account-eyebrow">WORKSPACE / PREFERENCES</div>
+          <h2>Settings</h2>
+          <p>Personalize how the finance tracker looks and behaves.</p>
+        </header>
+
+        <div class="settings-grid">
+          <section class="glass-card settings-panel" aria-labelledby="appearance-title">
+            <div class="account-card-heading">
+              <span class="account-card-icon" aria-hidden="true">◐</span>
+              <div>
+                <h3 id="appearance-title">Appearance</h3>
+                <p>Choose the theme for your workspace</p>
+              </div>
+            </div>
+            <div class="theme-options" role="group" aria-label="Color theme">
+              <button class="theme-option" type="button" data-theme-choice="dark" aria-pressed="false">🌙 <span>Dark</span></button>
+              <button class="theme-option" type="button" data-theme-choice="light" aria-pressed="false">☀️ <span>Light</span></button>
+            </div>
+            <label class="setting-row">
+              <span class="setting-copy">
+                <strong>Reduce motion</strong>
+                <small>Limit decorative animations across the app</small>
+              </span>
+              <input id="setting-reduce-motion" type="checkbox">
+            </label>
+            <label class="setting-row">
+              <span class="setting-copy">
+                <strong>Compact layout</strong>
+                <small>Use tighter spacing for a denser workspace</small>
+              </span>
+              <input id="setting-compact" type="checkbox">
+            </label>
+          </section>
+
+          <section class="glass-card settings-panel" aria-labelledby="privacy-title">
+            <div class="account-card-heading">
+              <span class="account-card-icon" aria-hidden="true">◉</span>
+              <div>
+                <h3 id="privacy-title">Privacy &amp; display</h3>
+                <p>Choose what is visible on your screen</p>
+              </div>
+            </div>
+            <label class="setting-row">
+              <span class="setting-copy">
+                <strong>Mask account balances</strong>
+                <small>Blur financial values while you use the dashboard</small>
+              </span>
+              <input id="setting-mask-balances" type="checkbox">
+            </label>
+            <div class="settings-inline-note">Balance masking is visual only and does not replace account security.</div>
+          </section>
+
+          <section class="glass-card settings-panel settings-notifications" aria-labelledby="notifications-title">
+            <div class="account-card-heading">
+              <span class="account-card-icon" aria-hidden="true">♧</span>
+              <div>
+                <h3 id="notifications-title">Notification preferences</h3>
+                <p>Select the reminders you want in this workspace</p>
+              </div>
+            </div>
+            <div class="notification-options">
+              <label class="setting-row">
+                <span class="setting-copy">
+                  <strong>Budget alerts</strong>
+                  <small>When a category approaches its limit</small>
+                </span>
+                <input id="setting-budget-alerts" type="checkbox">
+              </label>
+              <label class="setting-row">
+                <span class="setting-copy">
+                  <strong>Bill reminders</strong>
+                  <small>Upcoming bills and recurring payments</small>
+                </span>
+                <input id="setting-bill-reminders" type="checkbox">
+              </label>
+              <label class="setting-row">
+                <span class="setting-copy">
+                  <strong>Savings milestones</strong>
+                  <small>Progress updates for your savings goals</small>
+                </span>
+                <input id="setting-goal-updates" type="checkbox">
+              </label>
+            </div>
+            <div class="settings-inline-note">Preferences are saved in this browser. Notification delivery is not connected in this preview.</div>
+          </section>
+        </div>
+
+        <div class="settings-footer">
+          <p id="settings-feedback" role="status" aria-live="polite"></p>
+          <div class="settings-actions">
+            <button class="btn btn-ghost" type="button" id="settings-reset">Restore defaults</button>
+            <button class="btn btn-primary" type="button" id="settings-save">Save preferences</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main><!-- /main-content -->
+</div><!-- /pft-app -->
+
+
+<!-- ══════════════════════════════════════════════════════════
+     ADD TRANSACTION MODAL
+══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal-box">
+    <h2 class="modal-title" id="modal-title">Add Transaction</h2>
+    <div class="modal-tabs" id="modal-tabs">
+      <button class="modal-tab active" data-t="expense">Expense</button>
+      <button class="modal-tab" data-t="income">Income</button>
+      <button class="modal-tab" data-t="transfer">Transfer</button>
+    </div>
+    <form id="txn-form" novalidate>
+      <label class="modal-label" for="m-amt">Amount (₹)</label>
+      <input class="modal-input" id="m-amt" type="number" step="0.01" min="0.01" placeholder="0.00">
+
+      <label class="modal-label" for="m-cat">Category</label>
+      <select class="modal-select" id="m-cat">
+        <option>Food</option>
+        <option>Rent</option>
+        <option>Transport</option>
+        <option>Shopping</option>
+        <option>Bills</option>
+        <option>Salary</option>
+        <option>Others</option>
+      </select>
+
+      <label class="modal-label" for="m-acc">Account</label>
+      <select class="modal-select" id="m-acc">
+        <option>UPI</option>
+        <option>Bank</option>
+        <option>Cash</option>
+        <option>Card</option>
+      </select>
+
+      <label class="modal-label" for="m-date">Date</label>
+      <input class="modal-input" id="m-date" type="date">
+
+      <label class="modal-label" for="m-desc">Description</label>
+      <input class="modal-input" id="m-desc" maxlength="255" placeholder="What was this for?">
+
+      <div class="modal-err" id="modal-err" role="alert"></div>
+      <div class="modal-actions">
+        <button type="button" class="modal-cancel" id="modal-cancel">Cancel</button>
+        <button type="submit" class="modal-save">Save Transaction</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<!-- ══════════════════════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════════════════════ -->
+<script>
+/* ── Helpers ──────────────────────────────────────────────── */
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+const fmt = n => '₹' + n.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+const fmtDec = n => '₹' + n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const dstr = d => d.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+const reduced = matchMedia('(prefers-reduced-motion:reduce)').matches;
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+/* ── Demo Data ────────────────────────────────────────────── */
+const buds = [['Food',12000,9840],['Transport',6000,5100],['Shopping',5000,5650],['Bills',4500,2300]];
+const spendingCategories = [
+  ['Rent',14200,'#20d39a'],
+  ['Food',12000,'#62f0c0'],
+  ['Transport',6800,'#d7b76b'],
+  ['Shopping',5400,'#78aaff'],
+  ['Bills',4120,'#ff7778'],
+  ['Others',3800,'#9b8cf5']
+];
+const goals = [
+  { name:'Emergency Fund', icon:'◈', category:'Safety net', saved:37200, target:60000, targetDate:'Mar 2027', monthly:1800, onTrack:true, color:'#20d39a' },
+  { name:'Goa Trip', icon:'✧', category:'Travel', saved:24000, target:30000, targetDate:'Dec 2026', monthly:1500, onTrack:true, color:'#d7b76b' }
+];
+const txns = [
+  ['2026-11-14','Swiggy Dinner','Food','UPI',-640],
+  ['2026-11-13','Salary, November','Salary','Bank',85000],
+  ['2026-11-12','Metro Card Top-Up','Transport','UPI',-500],
+  ['2026-11-10','Electricity Bill','Bills','Bank',-1860],
+  ['2026-11-08','Sony Headphones','Shopping','Card',-3499],
+  ['2026-11-05','Room Rent','Rent','Bank',-12000]
+];
+let selectedTransactionCategory = '';
+/* ── Animated counter ─────────────────────────────────────── */
+function countUp(el, to, duration = 1100, format = fmt) {
+  if (!el) return;
+  if (reduced || document.documentElement.dataset.reduceMotion === 'true') {
+    el.textContent = format(to);
+    return;
+  }
+  const t0 = performance.now();
+  const tick = t => {
+    const p = Math.min((t - t0) / duration, 1);
+    const ease = 1 - Math.pow(1 - p, 3);
+    el.textContent = format(Math.round(to * ease));
+    if (p < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+/* ── Render KPIs ──────────────────────────────────────────── */
+function renderKPIs() {
+  [['balance-title',248560],['k1',85000],['k2',46320],['k3',38680]].forEach(([id,value]) => {
+    countUp($('#' + id), value);
+  });
+  countUp($('#health-score'), 72, 1200, value => String(value));
+}
+
+/* ── Render static sections ───────────────────────────────── */
+function renderStatic() {
+  $('#category-list').innerHTML = spendingCategories.map(([name, amount, color]) => {
+    const share = Math.round(amount / 46320 * 100);
+    return `<div class="category-row">
+      <span class="category-label"><i class="category-dot" style="--category-color:${color}"></i>${esc(name)}</span>
+      <span class="category-track"><span style="--category-color:${color};--bar-width:${share}%"></span></span>
+      <span class="category-amount">${fmt(amount)}</span>
+    </div>`;
+  }).join('');
+
+  $('#budget-list').innerHTML = buds.map(([name, limit, used], index) => {
+    const share = Math.min(100, Math.round(used / limit * 100));
+    const color = used > limit ? '#ff7778' : index === 1 ? '#d7b76b' : '#20d39a';
+    return `<div class="budget-row-v2${used > limit ? ' over-budget' : ''}">
+      <span class="budget-label">${esc(name)}</span>
+      <span class="budget-track"><span style="--category-color:${color};--bar-width:${share}%"></span></span>
+      <span class="budget-amount">${fmt(used)} / ${fmt(limit)}</span>
+    </div>`;
+  }).join('');
+
+  $('#dashboard-goals').innerHTML = goals.map(goal => {
+    const progress = Math.round(goal.saved / goal.target * 100);
+    return `<button type="button" class="dashboard-goal-row" data-navigate="goals" aria-label="Open ${esc(goal.name)} savings goal">
+      <span class="dashboard-goal-icon" aria-hidden="true">${goal.icon}</span>
+      <span class="dashboard-goal-copy">
+        <span class="dashboard-goal-heading"><strong>${esc(goal.name)}</strong><span>${progress}%</span></span>
+        <span class="dashboard-goal-amount"><span>${fmt(goal.saved)} saved</span><span>${fmt(goal.target)}</span></span>
+        <span class="dashboard-goal-track" aria-hidden="true"><span style="--goal-progress:${progress}%;--goal-color:${goal.color}"></span></span>
+      </span>
+    </button>`;
+  }).join('');
+
+  const totalSaved = goals.reduce((sum, goal) => sum + goal.saved, 0);
+  const totalTarget = goals.reduce((sum, goal) => sum + goal.target, 0);
+  const monthlyTotal = goals.reduce((sum, goal) => sum + goal.monthly, 0);
+  const overallProgress = Math.round(totalSaved / totalTarget * 100);
+  const setText = (selector, value) => { const element = $(selector); if (element) element.textContent = value; };
+  setText('#goal-saved-total', fmt(totalSaved));
+  setText('#goal-target-total', fmt(totalTarget));
+  setText('#goal-monthly-total', fmt(monthlyTotal));
+  setText('#goal-active-count', goals.length);
+  setText('#goal-on-track-count', goals.filter(goal => goal.onTrack).length);
+  setText('#goal-progress-number', overallProgress + '%');
+  setText('#goal-progress-label', overallProgress + '% of your combined target');
+  setText('#goal-remaining', fmt(totalTarget - totalSaved) + ' to go');
+  const overallProgressBar = $('#goal-overall-progress');
+  if (overallProgressBar) {
+    overallProgressBar.setAttribute('aria-valuenow', overallProgress);
+    overallProgressBar.querySelector('span').style.width = overallProgress + '%';
+  }
+  const overallRing = $('#goal-overall-ring');
+  if (overallRing) {
+    overallRing.style.setProperty('--goal-progress', overallProgress + '%');
+    overallRing.setAttribute('aria-label', 'Overall goal progress: ' + overallProgress + '%');
+  }
+  const goalCards = $('#goal-cards');
+  if (goalCards) goalCards.innerHTML = goals.map(goal => {
+    const progress = Math.round(goal.saved / goal.target * 100);
+    return `<article class="glass-card goal-card" style="--goal-color:${goal.color}">
+      <div class="goal-card-top">
+        <div class="goal-card-name-row">
+          <span class="goal-card-icon" aria-hidden="true">${goal.icon}</span>
+          <div>
+            <h4 class="goal-card-title">${esc(goal.name)}</h4>
+            <span class="goal-card-category">${esc(goal.category)}</span>
+          </div>
+        </div>
+        <span class="goal-status${goal.onTrack ? '' : ' goal-status-focus'}">${goal.onTrack ? 'On track' : 'In progress'}</span>
+      </div>
+      <div class="goal-card-total-row">
+        <strong class="goal-card-saved">${fmt(goal.saved)}</strong>
+        <span class="goal-card-target">of ${fmt(goal.target)}</span>
+      </div>
+      <div class="goal-card-progress">
+        <div class="goal-progress-track" role="progressbar" aria-label="${esc(goal.name)} progress"
+          aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress}" style="--goal-progress:${progress}%">
+          <span></span>
+        </div>
+      </div>
+      <div class="goal-card-meta">
+        <div><span>Target date</span><strong>${esc(goal.targetDate)}</strong></div>
+        <div><span>Planned monthly</span><strong>${fmt(goal.monthly)}</strong></div>
+      </div>
+    </article>`;
+  }).join('');
+
+  renderAllTransactions();
+}
+
+function renderTxnTable(selector, data) {
+  const el = $(selector);
+  if (!el) return;
+  el.innerHTML = data.map(([d, s, c, a, v]) => `
+    <tr>
+      <td>${dstr(new Date(d))}</td>
+      <td>${esc(s)}</td>
+      <td><span class="cat-badge">${esc(c)}</span></td>
+      <td>${esc(a)}</td>
+      <td class="amt ${v > 0 ? 'txn-pos' : 'txn-neg'}">${v > 0 ? '+' : ''}${fmtDec(Math.abs(v))}</td>
+    </tr>`).join('');
+}
+
+function renderAllTransactions() {
+  const visibleTransactions = selectedTransactionCategory
+    ? txns.filter(transaction => transaction[2] === selectedTransactionCategory)
+    : txns;
+  renderTxnTable('#txn-all-body', visibleTransactions);
+}
+
+const categoryPicker = $('#transaction-category-picker');
+if (categoryPicker) {
+  const categoryTrigger = $('#transaction-category-trigger');
+  const categoryMenu = $('#transaction-category-menu');
+  const categoryOptions = Array.from(categoryMenu.querySelectorAll('.category-option'));
+
+  function setCategoryMenuOpen(open, focusSelected = false) {
+    categoryMenu.hidden = !open;
+    categoryTrigger.setAttribute('aria-expanded', String(open));
+    if (open && focusSelected) {
+      const selectedOption = categoryOptions.find(option => option.getAttribute('aria-selected') === 'true');
+      if (selectedOption) selectedOption.focus();
+    }
+  }
+
+  categoryTrigger.addEventListener('click', () => {
+    setCategoryMenuOpen(categoryMenu.hidden, true);
+  });
+  categoryTrigger.addEventListener('keydown', event => {
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault();
+      setCategoryMenuOpen(true, true);
+    }
+  });
+  categoryOptions.forEach(option => {
+    option.addEventListener('click', () => {
+      selectedTransactionCategory = option.dataset.category;
+      categoryOptions.forEach(item => {
+        item.setAttribute('aria-selected', String(item === option));
+      });
+      categoryTrigger.querySelector('.category-value').textContent = option.dataset.label;
+      categoryTrigger.setAttribute('aria-label', 'Filter transactions by category: ' + option.dataset.label);
+      renderAllTransactions();
+      setCategoryMenuOpen(false);
+      categoryTrigger.focus();
+    });
+  });
+  categoryMenu.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      event.stopPropagation();
+      setCategoryMenuOpen(false);
+      categoryTrigger.focus();
+      return;
+    }
+
+    const currentIndex = categoryOptions.indexOf(document.activeElement);
+    let nextIndex = currentIndex;
+    if (event.key === 'ArrowDown') nextIndex = (currentIndex + 1) % categoryOptions.length;
+    else if (event.key === 'ArrowUp') nextIndex = (currentIndex - 1 + categoryOptions.length) % categoryOptions.length;
+    else if (event.key === 'Home') nextIndex = 0;
+    else if (event.key === 'End') nextIndex = categoryOptions.length - 1;
+    else return;
+
+    event.preventDefault();
+    categoryOptions[nextIndex].focus();
+  });
+  document.addEventListener('pointerdown', event => {
+    if (!categoryPicker.contains(event.target)) setCategoryMenuOpen(false);
+  });
+  document.addEventListener('focusin', event => {
+    if (!categoryPicker.contains(event.target)) setCategoryMenuOpen(false);
+  });
+}
+
+/* ── Three.js scenes ──────────────────────────────────────── */
+function createV2Renderer(canvas, fallback) {
+  try {
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      alpha: true,
+      antialias: true,
+      powerPreference: 'low-power'
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.6));
+    renderer.setClearColor(0x000000, 0);
+    return renderer;
+  } catch (error) {
+    fallback.classList.add('webgl-fallback');
+    console.error('Unable to initialize the dashboard WebGL scene.', error);
+    return null;
+  }
+}
+
+function resizeV2Renderer(renderer, camera, canvas, render) {
+  const resize = () => {
+    const bounds = canvas.getBoundingClientRect();
+    if (!bounds.width || !bounds.height) return;
+    renderer.setSize(bounds.width, bounds.height, false);
+    camera.aspect = bounds.width / bounds.height;
+    camera.updateProjectionMatrix();
+    render();
+  };
+  if (typeof ResizeObserver === 'function') {
+    new ResizeObserver(resize).observe(canvas.parentElement);
+  } else {
+    window.addEventListener('resize', resize);
+  }
+  resize();
+}
+
+function canAnimateV2() {
+  const dashboard = $('#page-dashboard');
+  return !reduced
+    && document.documentElement.dataset.reduceMotion !== 'true'
+    && !document.hidden
+    && dashboard
+    && dashboard.classList.contains('active');
+}
+
+function bindV2Animation(render, update) {
+  let frame = null;
+  const animate = () => {
+    if (!canAnimateV2()) {
+      frame = null;
+      render();
+      return;
+    }
+    frame = requestAnimationFrame(animate);
+    update();
+    render();
+  };
+  const syncMotion = () => {
+    if (canAnimateV2()) {
+      if (frame === null) animate();
+    } else if (frame !== null) {
+      cancelAnimationFrame(frame);
+      frame = null;
+      render();
+    }
+  };
+  document.addEventListener('visibilitychange', syncMotion);
+  window.addEventListener('pft-v2-state-change', syncMotion);
+  syncMotion();
+}
+
+function createCardGeometry(THREE, width, height, radius, depth) {
+  const shape = new THREE.Shape();
+  shape.moveTo(-width / 2 + radius, -height / 2);
+  shape.lineTo(width / 2 - radius, -height / 2);
+  shape.absarc(width / 2 - radius, -height / 2 + radius, radius, -Math.PI / 2, 0, false);
+  shape.lineTo(width / 2, height / 2 - radius);
+  shape.absarc(width / 2 - radius, height / 2 - radius, radius, 0, Math.PI / 2, false);
+  shape.lineTo(-width / 2 + radius, height / 2);
+  shape.absarc(-width / 2 + radius, height / 2 - radius, radius, Math.PI / 2, Math.PI, false);
+  shape.lineTo(-width / 2, -height / 2 + radius);
+  shape.absarc(-width / 2 + radius, -height / 2 + radius, radius, Math.PI, Math.PI * 1.5, false);
+  const geometry = new THREE.ExtrudeGeometry(shape, {
+    depth,
+    bevelEnabled: true,
+    bevelSegments: 3,
+    bevelSize: 0.035,
+    bevelThickness: 0.025,
+    curveSegments: 10
+  });
+  geometry.center();
+  return geometry;
+}
+
+function createCardTexture(THREE) {
+  const lightTheme = document.documentElement.dataset.theme === 'light';
+  const surface = document.createElement('canvas');
+  surface.width = 900;
+  surface.height = 560;
+  const context = surface.getContext('2d');
+  const gradient = context.createLinearGradient(0, 0, 900, 560);
+  gradient.addColorStop(0, lightTheme ? '#D2C3F6' : '#176f51');
+  gradient.addColorStop(.54, lightTheme ? '#9C83CE' : '#0b392c');
+  gradient.addColorStop(1, lightTheme ? '#6D5398' : '#17251a');
+  context.fillStyle = gradient;
+  context.fillRect(0, 0, surface.width, surface.height);
+  const sheen = context.createRadialGradient(690, 70, 10, 690, 70, 430);
+  sheen.addColorStop(0, 'rgba(238,207,128,.27)');
+  sheen.addColorStop(1, 'rgba(238,207,128,0)');
+  context.fillStyle = sheen;
+  context.fillRect(0, 0, surface.width, surface.height);
+  context.strokeStyle = lightTheme ? 'rgba(50,36,72,.3)' : 'rgba(218,255,239,.36)';
+  context.lineWidth = 3;
+  context.strokeRect(12, 12, 876, 536);
+  context.fillStyle = lightTheme ? '#322448' : '#ecfff7';
+  context.font = '700 43px Inter, Arial, sans-serif';
+  context.fillText('ARTHA', 56, 90);
+  context.fillStyle = '#d7b76b';
+  context.font = '600 19px Inter, Arial, sans-serif';
+  context.fillText('PREMIUM DEBIT', 56, 125);
+  context.fillStyle = 'rgba(235,220,165,.9)';
+  context.beginPath();
+  context.moveTo(73,205);
+  context.lineTo(145,205);
+  context.quadraticCurveTo(160,205,160,220);
+  context.lineTo(160,264);
+  context.quadraticCurveTo(160,279,145,279);
+  context.lineTo(73,279);
+  context.quadraticCurveTo(58,279,58,264);
+  context.lineTo(58,220);
+  context.quadraticCurveTo(58,205,73,205);
+  context.closePath();
+  context.fill();
+  context.strokeStyle = 'rgba(88,93,61,.64)';
+  context.lineWidth = 3;
+  context.beginPath();
+  context.moveTo(58, 242); context.lineTo(160, 242);
+  context.moveTo(108, 205); context.lineTo(108, 279);
+  context.stroke();
+  context.fillStyle = 'rgba(238,255,248,.92)';
+  context.font = '500 29px monospace';
+  context.fillText('••••  ••••  ••••  4082', 56, 435);
+  context.fillStyle = 'rgba(234,216,163,.9)';
+  context.font = '700 20px Inter, Arial, sans-serif';
+  context.fillText('INR  /  EVERYDAY', 56, 493);
+  const texture = new THREE.CanvasTexture(surface);
+  texture.encoding = THREE.sRGBEncoding;
+  return texture;
+}
+
+function createCardBackTexture(THREE) {
+  const lightTheme = document.documentElement.dataset.theme === 'light';
+  const surface = document.createElement('canvas');
+  surface.width = 900;
+  surface.height = 560;
+  const context = surface.getContext('2d');
+  const gradient = context.createLinearGradient(0, 0, 900, 560);
+  gradient.addColorStop(0, lightTheme ? '#D2C3F6' : '#17372d');
+  gradient.addColorStop(.58, lightTheme ? '#9C83CE' : '#0b211c');
+  gradient.addColorStop(1, lightTheme ? '#6D5398' : '#1b2b25');
+  context.fillStyle = gradient;
+  context.fillRect(0, 0, surface.width, surface.height);
+  context.strokeStyle = lightTheme ? 'rgba(50,36,72,.3)' : 'rgba(218,255,239,.36)';
+  context.lineWidth = 3;
+  context.strokeRect(12, 12, 876, 536);
+  context.fillStyle = lightTheme ? '#322448' : '#e7fff5';
+  context.font = '700 43px Inter, Arial, sans-serif';
+  context.fillText('ARTHA', 56, 106);
+  context.fillStyle = lightTheme ? '#45355E' : '#111a17';
+  context.fillRect(0, 160, 900, 112);
+  context.fillStyle = '#d7b76b';
+  context.fillRect(56, 340, 300, 58);
+  context.fillStyle = lightTheme ? '#6D5398' : '#25352e';
+  context.fillRect(70, 353, 268, 32);
+  context.fillStyle = 'rgba(235,247,240,.76)';
+  context.font = '600 19px Inter, Arial, sans-serif';
+  context.fillText('TRACK  ·  PLAN  ·  GROW', 56, 480);
+  const texture = new THREE.CanvasTexture(surface);
+  texture.encoding = THREE.sRGBEncoding;
+  return texture;
+}
+
+function initHeroScene() {
+  const stage = $('#hero-stage');
+  const canvas = $('#hero-canvas');
+  if (!stage || !canvas) return;
+  const renderer = createV2Renderer(canvas, stage);
+  if (!renderer) return;
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(31, 1, 0.1, 40);
+  camera.position.set(0, 0, 7.7);
+  const ambientLight = new THREE.AmbientLight(0xb7ffe1, 1.55);
+  scene.add(ambientLight);
+  const keyLight = new THREE.PointLight(0x55ffb6, 3.2, 15);
+  keyLight.position.set(-3, 3, 4);
+  scene.add(keyLight);
+  const goldLight = new THREE.PointLight(0xe5bd67, 2.4, 12);
+  goldLight.position.set(3, -2, 3);
+  scene.add(goldLight);
+
+  const cardSpin = new THREE.Group();
+  const card = new THREE.Group();
+  const cardBodyMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0x95f6c9,
+      metalness: 0.22,
+      roughness: 0.19,
+      transmission: 0.27,
+      transparent: true,
+      opacity: 0.88,
+      clearcoat: 1,
+      clearcoatRoughness: 0.16
+    });
+  const body = new THREE.Mesh(createCardGeometry(THREE, 3.65, 2.27, 0.22, 0.12), cardBodyMaterial);
+  card.add(body);
+  const frontTexture = createCardTexture(THREE);
+  const face = new THREE.Mesh(
+    new THREE.PlaneGeometry(3.55, 2.17),
+    new THREE.MeshBasicMaterial({ map: frontTexture, transparent: true, opacity: 0.92 })
+  );
+  face.position.z = 0.11;
+  card.add(face);
+  const backTexture = createCardBackTexture(THREE);
+  const backFace = new THREE.Mesh(
+    new THREE.PlaneGeometry(3.55, 2.17),
+    new THREE.MeshBasicMaterial({ map: backTexture, transparent: true, opacity: 0.92 })
+  );
+  backFace.position.z = -0.11;
+  backFace.rotation.y = Math.PI;
+  card.add(backFace);
+  cardSpin.add(card);
+  scene.add(cardSpin);
+  const updateTheme = () => {
+    const lightTheme = document.documentElement.dataset.theme === 'light';
+    cardBodyMaterial.color.setHex(lightTheme ? 0xD2C3F6 : 0x95f6c9);
+    ambientLight.color.setHex(lightTheme ? 0xe9ddff : 0xb7ffe1);
+    keyLight.color.setHex(lightTheme ? 0xBFAAE9 : 0x55ffb6);
+    keyLight.intensity = lightTheme ? 2.6 : 3.2;
+    face.material.map.dispose();
+    backFace.material.map.dispose();
+    face.material.map = createCardTexture(THREE);
+    backFace.material.map = createCardBackTexture(THREE);
+    face.material.needsUpdate = true;
+    backFace.material.needsUpdate = true;
+    renderer.render(scene, camera);
+  };
+  window.addEventListener('pft-theme-change', updateTheme);
+
+  const coins = [];
+  [
+    { color:0xe5b84f, emissive:0x67470c, detailColor:0xffe6a3, radius:2.4, speed:.65, phase:.2 },
+    { color:0xe8edf2, emissive:0x9ca5ad, detailColor:0xf7fbff, metalness:.58, roughness:.3, emissiveIntensity:.24, radius:2.3, speed:-.56, phase:2.4 },
+    { color:0xd3a63c, emissive:0x60420d, detailColor:0xffe3a0, radius:2.45, speed:.48, phase:4.2 }
+  ].forEach((spec, index) => {
+    const coin = new THREE.Group();
+    const metal = new THREE.MeshStandardMaterial({
+      color:spec.color,
+      metalness:spec.metalness === undefined ? .9 : spec.metalness,
+      roughness:spec.roughness === undefined ? .2 : spec.roughness,
+      emissive:spec.emissive,
+      emissiveIntensity:spec.emissiveIntensity === undefined ? .24 : spec.emissiveIntensity
+    });
+    const faceMesh = new THREE.Mesh(new THREE.CylinderGeometry(.19,.19,.055,32), metal);
+    faceMesh.rotation.x = Math.PI / 2;
+    coin.add(faceMesh);
+    const detail = new THREE.Mesh(
+      new THREE.TorusGeometry(.105,.014,8,28),
+      new THREE.MeshStandardMaterial({ color:spec.detailColor, metalness:.8, roughness:.18 })
+    );
+    detail.position.z = .04;
+    coin.add(detail);
+    const center = new THREE.Mesh(
+      new THREE.CylinderGeometry(.047,.047,.012,24),
+      new THREE.MeshStandardMaterial({ color:spec.detailColor, metalness:.82, roughness:.2 })
+    );
+    center.rotation.x = Math.PI / 2;
+    center.position.z = .04;
+    coin.add(center);
+    scene.add(coin);
+    coins.push({ mesh:coin, ...spec });
+  });
+
+  let targetX = -.08;
+  let targetY = -.14;
+  const render = () => renderer.render(scene, camera);
+  stage.addEventListener('pointermove', event => {
+    const bounds = stage.getBoundingClientRect();
+    targetY = ((event.clientX - bounds.left) / bounds.width - .5) * .44;
+    targetX = ((event.clientY - bounds.top) / bounds.height - .5) * -.28;
+    if (!canAnimateV2()) render();
+  });
+  stage.addEventListener('pointerleave', () => {
+    targetX = -.08;
+    targetY = -.14;
+    if (!canAnimateV2()) render();
+  });
+  resizeV2Renderer(renderer, camera, canvas, render);
+
+  const clock = new THREE.Clock();
+  bindV2Animation(render, () => {
+    const time = clock.getElapsedTime();
+    cardSpin.rotation.y = time * .42;
+    cardSpin.rotation.x = Math.sin(time * .3) * .045;
+    card.rotation.x += (targetX + Math.sin(time * .65) * .025 - card.rotation.x) * .035;
+    card.rotation.y += (targetY + Math.sin(time * .42) * .04 - card.rotation.y) * .035;
+    card.position.y = Math.sin(time * .8) * .055;
+    coins.forEach((coin, index) => {
+      const angle = time * coin.speed + coin.phase;
+      coin.mesh.position.set(Math.cos(angle) * coin.radius, Math.sin(angle) * 1.5, .4 + Math.sin(angle) * .08);
+      coin.mesh.rotation.z += .014 + index * .004;
+      coin.mesh.rotation.y = Math.sin(angle) * .12;
+    });
+  });
+}
+
+function initHealthScene() {
+  const stage = $('.health-visual');
+  const canvas = $('#health-canvas');
+  if (!stage || !canvas) return;
+  const renderer = createV2Renderer(canvas, stage);
+  if (!renderer) return;
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(34, 1, .1, 30);
+  camera.position.set(0, 0, 4.7);
+  const ambientLight = new THREE.AmbientLight(0x91fbd1, 1.35);
+  scene.add(ambientLight);
+  const light = new THREE.PointLight(0x24efa8, 3.5, 10);
+  light.position.set(-2, 2, 3);
+  scene.add(light);
+  const goldLight = new THREE.PointLight(0xd7b76b, 1.4, 8);
+  goldLight.position.set(2, -1, 2);
+  scene.add(goldLight);
+
+  const ringGroup = new THREE.Group();
+  const trackMaterial = new THREE.MeshStandardMaterial({ color:0x164537, metalness:.65, roughness:.3 });
+  const track = new THREE.Mesh(
+    new THREE.TorusGeometry(1.05,.085,18,120),
+    trackMaterial
+  );
+  ringGroup.add(track);
+  const progressMaterial = new THREE.MeshStandardMaterial({ color:0x20d39a, emissive:0x08764e, emissiveIntensity:1.15, metalness:.58, roughness:.2 });
+  const progress = new THREE.Mesh(
+    new THREE.TorusGeometry(1.05,.092,20,120,Math.PI * 2 * .72),
+    progressMaterial
+  );
+  progress.rotation.z = Math.PI / 2;
+  ringGroup.add(progress);
+  const accent = new THREE.Mesh(
+    new THREE.TorusGeometry(.81,.018,8,100),
+    new THREE.MeshStandardMaterial({ color:0xd7b76b, emissive:0x594618, emissiveIntensity:.55, metalness:.7, roughness:.25, transparent:true, opacity:.78 })
+  );
+  ringGroup.add(accent);
+  ringGroup.rotation.x = .33;
+  scene.add(ringGroup);
+
+  const particlePositions = [];
+  for (let i = 0; i < 110; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const radius = 1.35 + Math.random() * .75;
+    particlePositions.push(Math.cos(angle) * radius, (Math.random() - .5) * 2.2, (Math.random() - .5) * .8);
+  }
+  const particlesGeometry = new THREE.BufferGeometry();
+  particlesGeometry.setAttribute('position', new THREE.Float32BufferAttribute(particlePositions,3));
+  const particlesMaterial = new THREE.PointsMaterial({ color:0x73f2c0, size:.022, transparent:true, opacity:.68, sizeAttenuation:true });
+  const particles = new THREE.Points(
+    particlesGeometry,
+    particlesMaterial
+  );
+  scene.add(particles);
+
+  const render = () => renderer.render(scene, camera);
+  const updateTheme = () => {
+    const lightTheme = document.documentElement.dataset.theme === 'light';
+    ambientLight.color.setHex(lightTheme ? 0xe9ddff : 0x91fbd1);
+    light.color.setHex(lightTheme ? 0xBFAAE9 : 0x24efa8);
+    trackMaterial.color.setHex(lightTheme ? 0xe6def0 : 0x164537);
+    progressMaterial.color.setHex(lightTheme ? 0xD2C3F6 : 0x20d39a);
+    progressMaterial.emissive.setHex(lightTheme ? 0x6D5398 : 0x08764e);
+    particlesMaterial.color.setHex(lightTheme ? 0xBFAAE9 : 0x73f2c0);
+    render();
+  };
+  window.addEventListener('pft-theme-change', updateTheme);
+  updateTheme();
+  resizeV2Renderer(renderer, camera, canvas, render);
+  const clock = new THREE.Clock();
+  bindV2Animation(render, () => {
+    const time = clock.getElapsedTime();
+    ringGroup.rotation.z = time * .38;
+    ringGroup.rotation.y = time * .5;
+    ringGroup.rotation.x = .33 + Math.sin(time * .25) * .08;
+    particles.rotation.y = -time * .045;
+    particles.rotation.x = Math.sin(time * .24) * .08;
+  });
+}
+
+function initThreeScenes() {
+  const heroStage = $('#hero-stage');
+  const healthStage = $('.health-visual');
+  if (!window.THREE) {
+    if (heroStage) heroStage.classList.add('webgl-fallback');
+    if (healthStage) healthStage.classList.add('webgl-fallback');
+    console.error('Three.js could not be loaded; showing dashboard visual fallbacks.');
+    return;
+  }
+  initHeroScene();
+  initHealthScene();
+}
+
+/* ── SPA Navigation ───────────────────────────────────────── */
+const pageHeaders = {
+  dashboard: ['Your dashboard', 'Your financial picture, with a little more clarity.'],
+  transactions: ['Transactions', 'Review your recent financial activity.'],
+  accounts: ['Accounts', 'Manage the accounts behind your financial overview.'],
+  budgets: ['Budget Planner', 'Plan spending and keep category limits in view.'],
+  goals: ['Savings Goals', 'Track your goals and celebrate your progress.'],
+  analytics: ['Analytics', 'A clearer view of your cash flow, spending, and plans.'],
+  loans: ['Loans & EMI', 'Keep repayments and upcoming due dates in view.'],
+  subscriptions: ['Subscriptions', 'Review recurring charges and renewal dates.'],
+  insights: ['Insights', 'Understand patterns across your spending and income.'],
+  reports: ['Reports', 'Review clear summaries of your finances.'],
+  notifications: ['Notifications', 'Keep important updates and reminders in view.'],
+  profile: ['Profile', 'Review your profile information.'],
+  settings: ['Settings', 'Customize your dashboard experience.']
+};
+
+function navigate(page) {
+  const sectionPage = page === 'analytics' ? 'dashboard' : page;
+  $$('.nav-item[data-page]').forEach(btn => {
+    const active = btn.dataset.page === page;
+    btn.classList.toggle('active', active);
+    if (active) btn.setAttribute('aria-current', 'page');
+    else btn.removeAttribute('aria-current');
+  });
+  const header = pageHeaders[page];
+  if (header) {
+    $('.topbar-greeting h1').textContent = header[0];
+    $('.topbar-greeting p').textContent = header[1];
+  }
+  $$('.page-section').forEach(sec => {
+    sec.classList.toggle('active', sec.id === 'page-' + sectionPage);
+  });
+  window.dispatchEvent(new Event('pft-v2-state-change'));
+  if (page === 'analytics') {
+    requestAnimationFrame(() => $('#analytics-zone').scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'center' }));
+  } else {
+    window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+  }
+}
+
+$$('.nav-item[data-page]').forEach(btn => {
+  btn.addEventListener('click', () => navigate(btn.dataset.page));
+});
+document.addEventListener('click', event => {
+  const control = event.target.closest('[data-navigate]');
+  if (control) navigate(control.dataset.navigate);
+});
+
+$$('[data-metric-tab]').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const selected = tab.dataset.metricTab;
+    $$('[data-metric-tab]').forEach(item => {
+      const active = item === tab;
+      item.classList.toggle('active', active);
+      item.setAttribute('aria-selected', String(active));
+      item.tabIndex = active ? 0 : -1;
+    });
+    $$('[data-metric-panel]').forEach(panel => {
+      panel.hidden = panel.dataset.metricPanel !== selected;
+    });
+  });
+});
+
+$('.metric-tabs').addEventListener('keydown', event => {
+  const tabs = Array.from($$('[data-metric-tab]'));
+  const index = tabs.indexOf(document.activeElement);
+  if (index < 0) return;
+  const direction = event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0;
+  if (!direction && event.key !== 'Home' && event.key !== 'End') return;
+  event.preventDefault();
+  const next = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : (index + direction + tabs.length) % tabs.length;
+  tabs[next].focus();
+  tabs[next].click();
+});
+
+/* ── Theme and workspace preferences ─────────────────────── */
+function setSettingsFeedback(message, isError) {
+  const feedback = $('#settings-feedback');
+  if (!feedback) return;
+  feedback.textContent = message;
+  feedback.dataset.state = isError ? 'error' : 'success';
+}
+
+function syncThemeOptions() {
+  $$('[data-theme-choice]').forEach(button => {
+    button.setAttribute('aria-pressed', String(button.dataset.themeChoice === document.documentElement.dataset.theme));
+  });
+}
+
+function applyTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  syncThemeOptions();
+  window.dispatchEvent(new Event('pft-theme-change'));
+}
+try {
+  const saved = localStorage.getItem('pft-theme');
+  if (saved === 'light' || saved === 'dark') applyTheme(saved);
+} catch(e) {
+  setSettingsFeedback('Theme preference could not be read from this browser.', true);
+}
+syncThemeOptions();
+
+const defaultPreferences = {
+  reduceMotion: false,
+  compactLayout: false,
+  maskBalances: false,
+  budgetAlerts: true,
+  billReminders: true,
+  goalUpdates: true
+};
+const preferenceInputIds = {
+  reduceMotion: 'setting-reduce-motion',
+  compactLayout: 'setting-compact',
+  maskBalances: 'setting-mask-balances',
+  budgetAlerts: 'setting-budget-alerts',
+  billReminders: 'setting-bill-reminders',
+  goalUpdates: 'setting-goal-updates'
+};
+
+function applyPreferences(preferences) {
+  document.documentElement.dataset.reduceMotion = String(preferences.reduceMotion);
+  document.documentElement.dataset.maskBalances = String(preferences.maskBalances);
+  document.body.classList.toggle('compact-layout', preferences.compactLayout);
+  window.dispatchEvent(new Event('pft-v2-state-change'));
+}
+
+function syncPreferenceInputs(preferences) {
+  Object.keys(preferenceInputIds).forEach(key => {
+    const input = document.getElementById(preferenceInputIds[key]);
+    if (input) input.checked = preferences[key];
+  });
+}
+
+let currentPreferences = { ...defaultPreferences };
+try {
+  const savedPreferences = localStorage.getItem('pft-settings');
+  if (savedPreferences) {
+    const parsedPreferences = JSON.parse(savedPreferences);
+    if (!parsedPreferences || typeof parsedPreferences !== 'object' || Array.isArray(parsedPreferences)) {
+      throw new Error('Saved preferences must be an object.');
+    }
+    Object.keys(defaultPreferences).forEach(key => {
+      if (typeof parsedPreferences[key] === 'boolean') currentPreferences[key] = parsedPreferences[key];
+    });
+  }
+} catch(e) {
+  setSettingsFeedback('Saved preferences could not be loaded. Defaults are shown.', true);
+}
+syncPreferenceInputs(currentPreferences);
+applyPreferences(currentPreferences);
+
+$$('[data-theme-choice]').forEach(button => {
+  button.addEventListener('click', () => {
+    const theme = button.dataset.themeChoice;
+    applyTheme(theme);
+    try {
+      localStorage.setItem('pft-theme', theme);
+      setSettingsFeedback('Theme updated and saved on this browser.');
+    } catch(e) {
+      setSettingsFeedback('Theme changed for this session, but could not be saved.', true);
+    }
+  });
+});
+
+$('#settings-save').addEventListener('click', () => {
+  const nextPreferences = {};
+  Object.keys(preferenceInputIds).forEach(key => {
+    nextPreferences[key] = document.getElementById(preferenceInputIds[key]).checked;
+  });
+  try {
+    localStorage.setItem('pft-settings', JSON.stringify(nextPreferences));
+    currentPreferences = nextPreferences;
+    applyPreferences(currentPreferences);
+    setSettingsFeedback('Preferences saved on this browser.');
+  } catch(e) {
+    applyPreferences(nextPreferences);
+    setSettingsFeedback('Preferences apply for this session but could not be saved.', true);
+  }
+});
+
+$('#settings-reset').addEventListener('click', () => {
+  try {
+    localStorage.removeItem('pft-settings');
+    localStorage.setItem('pft-theme', 'dark');
+    currentPreferences = { ...defaultPreferences };
+    syncPreferenceInputs(currentPreferences);
+    applyPreferences(currentPreferences);
+    applyTheme('dark');
+    setSettingsFeedback('Default preferences restored.');
+  } catch(e) {
+    setSettingsFeedback('Could not restore defaults in browser storage.', true);
+  }
+});
+
+/* ── Add Transaction Modal ────────────────────────────────── */
+let modalType = 'expense';
+const modal = $('#modal');
+
+function openModal() {
+  $('#m-date').valueAsDate = new Date();
+  $('#modal-err').textContent = '';
+  modal.classList.add('open');
+  setTimeout(() => $('#m-amt').focus(), 50);
+}
+function closeModal() { modal.classList.remove('open'); }
+
+$('#add-txn-btn').onclick = openModal;
+$('#hero-add-transaction').onclick = openModal;
+$('#modal-cancel').onclick = closeModal;
+modal.onclick = e => { if (e.target === modal) closeModal(); };
+addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+$('#modal-tabs').onclick = e => {
+  const tab = e.target.closest('[data-t]');
+  if (!tab) return;
+  modalType = tab.dataset.t;
+  $$('.modal-tab').forEach(t => t.classList.toggle('active', t === tab));
+};
+
+$('#txn-form').onsubmit = e => {
+  e.preventDefault();
+  const amt = parseFloat($('#m-amt').value);
+  if (!(amt > 0)) { $('#modal-err').textContent = 'Enter an amount greater than 0.'; return; }
+  if (!$('#m-date').value) { $('#modal-err').textContent = 'Choose a date.'; return; }
+  const val = modalType === 'income' ? amt : -amt;
+  txns.unshift([$('#m-date').value, $('#m-desc').value || 'Untitled', $('#m-cat').value, $('#m-acc').value, val]);
+  txns.length = Math.min(txns.length, 10);
+  renderTxnTable('#txn-body', txns.slice(0,6));
+  renderAllTransactions();
+  e.target.reset();
+  closeModal();
+};
+
+/* ── Boot ─────────────────────────────────────────────────── */
+renderStatic();
+renderKPIs();
+initThreeScenes();
+navigate('dashboard');
+</script>
+</body>
+</html>

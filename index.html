@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="refresh" content="0;url=dashboard.html">
+  <title>Artha — Personal Finance</title>
+  <link rel="stylesheet" href="assets/css/pft-core.css">
+  <style>
+    .redirect-wrap {
+      display: grid;
+      place-items: center;
+      min-height: 100vh;
+      text-align: center;
+      gap: 20px;
+    }
+    .redirect-logo {
+      width: 180px;
+      height: 120px;
+      margin: 0 auto;
+    }
+    .redirect-logo img { display: block; width: 100%; height: 100%; object-fit: contain; }
+    .redirect-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+    }
+    .redirect-msg {
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+    .redirect-link {
+      color: var(--accent);
+      font-size: 14px;
+      text-decoration: underline;
+    }
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--glass-border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="redirect-wrap">
+    <div class="redirect-logo"><img src="assets/images/artha-logo.png" alt="Artha — Track, Plan, Grow"></div>
+    <div class="redirect-title">Artha — Personal Finance</div>
+    <div class="spinner"></div>
+    <p class="redirect-msg">Redirecting to your dashboard…</p>
+    <a class="redirect-link" href="dashboard.html">Click here if not redirected automatically</a>
+  </div>
+  <script>
+    try {
+      var t = localStorage.getItem('pft-theme');
+      if (t) document.documentElement.dataset.theme = t;
+    } catch(e) {}
+    setTimeout(function() { window.location.href = 'dashboard.html'; }, 800);
+  </script>
+</body>
+</html>

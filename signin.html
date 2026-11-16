@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#020f0d">
+  <title>Sign in — Artha</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/pft-core.css">
+  <link rel="stylesheet" href="assets/css/pft-auth.css">
+</head>
+<body>
+  <div class="auth-page">
+    <header class="auth-topbar">
+      <a class="auth-brand" href="dashboard.html">
+        <img class="auth-brand-image" src="assets/images/artha-logo.png" alt="Artha — Track, Plan, Grow">
+      </a>
+      <p class="auth-top-link">New to Artha? <a href="signup.html">Create an account</a></p>
+    </header>
+
+    <main class="auth-layout">
+      <section class="auth-story" aria-labelledby="story-title">
+        <span class="auth-eyebrow">Your finances, in focus</span>
+        <h1 id="story-title">A calmer way to <span>stay on top</span> of money.</h1>
+        <p class="auth-story-copy">Bring your spending, savings, and goals into one clear view. Pick up where you left off and make your next money move with confidence.</p>
+
+        <div class="auth-visual" aria-label="Illustrative monthly balance chart">
+          <div class="auth-visual-head">
+            <span class="auth-visual-label">Total balance</span>
+            <span class="auth-visual-period">Last 6 months⌄</span>
+          </div>
+          <div class="auth-balance-row">
+            <strong class="auth-balance">₹2,48,560</strong>
+            <span class="auth-change">↗ 4.2%</span>
+          </div>
+          <svg class="auth-chart" viewBox="0 0 520 112" role="img" aria-label="A rising balance trend">
+            <defs>
+              <linearGradient id="balance-fill" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0" stop-color="#00d4c8" stop-opacity=".24"/>
+                <stop offset="1" stop-color="#00d4c8" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <path d="M0 85 C38 78 46 92 83 70 S133 75 172 57 S220 72 260 48 S317 61 350 33 S411 54 442 24 S489 34 520 9 V112 H0Z" fill="url(#balance-fill)"/>
+            <path d="M0 85 C38 78 46 92 83 70 S133 75 172 57 S220 72 260 48 S317 61 350 33 S411 54 442 24 S489 34 520 9" fill="none" stroke="#00d4c8" stroke-width="3" stroke-linecap="round"/>
+            <path d="M0 108 H520" stroke="currentColor" stroke-opacity=".12" stroke-dasharray="3 7"/>
+            <circle cx="442" cy="24" r="5" fill="#00d4c8" stroke="#06231f" stroke-width="3"/>
+          </svg>
+          <div class="auth-visual-foot">
+            <span class="auth-legend"><i></i> Balance</span>
+            <span class="auth-legend"><i></i> Savings trend</span>
+          </div>
+        </div>
+        <p class="auth-story-note">A thoughtful overview for everyday financial decisions.</p>
+      </section>
+
+      <section class="auth-card" aria-labelledby="signin-title">
+        <span class="auth-preview-tag">Visual preview · no account is created</span>
+        <h2 id="signin-title">Welcome back</h2>
+        <p class="auth-card-intro">Sign in to continue to your financial dashboard.</p>
+
+        <form class="auth-form" id="signin-form">
+          <div class="auth-field">
+            <label class="auth-label" for="signin-email">Email address</label>
+            <input class="auth-input" id="signin-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+          </div>
+          <div class="auth-field">
+            <label class="auth-label" for="signin-password">Password</label>
+            <div class="auth-input-wrap">
+              <input class="auth-input has-toggle" id="signin-password" name="password" type="password" autocomplete="current-password" minlength="8" placeholder="Enter your password" required>
+              <button class="auth-password-toggle" type="button" data-password-toggle="signin-password" aria-label="Show password" aria-pressed="false">Show</button>
+            </div>
+          </div>
+          <div class="auth-meta-row">
+            <label class="auth-check"><input type="checkbox" name="remember"> Keep me signed in</label>
+            <button class="auth-muted-action" type="button" id="forgot-password">Forgot password?</button>
+          </div>
+          <p class="auth-form-note" id="signin-note" role="status" aria-live="polite"></p>
+          <button class="auth-submit" type="submit">Sign in <span aria-hidden="true">→</span></button>
+        </form>
+
+        <p class="auth-switch">Don't have an account? <a href="signup.html">Create one</a></p>
+        <p class="auth-card-footer">This is a visual prototype. Authentication and password recovery are not connected.</p>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    document.querySelectorAll('[data-password-toggle]').forEach(function(button) {
+      button.addEventListener('click', function() {
+        var input = document.getElementById(button.dataset.passwordToggle);
+        var reveal = input.type === 'password';
+        input.type = reveal ? 'text' : 'password';
+        button.textContent = reveal ? 'Hide' : 'Show';
+        button.setAttribute('aria-label', reveal ? 'Hide password' : 'Show password');
+        button.setAttribute('aria-pressed', String(reveal));
+      });
+    });
+
+    var signinForm = document.getElementById('signin-form');
+    var signinNote = document.getElementById('signin-note');
+    signinForm.addEventListener('submit', function(event) {
+      event.preventDefault();
+      signinNote.textContent = 'Design preview only — sign-in is not connected and no details were saved.';
+      signinNote.classList.add('is-visible');
+    });
+
+    document.getElementById('forgot-password').addEventListener('click', function() {
+      signinNote.textContent = 'Password recovery is not connected in this design preview.';
+      signinNote.classList.add('is-visible');
+    });
+  </script>
+</body>
+</html>

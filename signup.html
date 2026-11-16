@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#020f0d">
+  <title>Create account — Artha</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/pft-core.css">
+  <link rel="stylesheet" href="assets/css/pft-auth.css">
+</head>
+<body>
+  <div class="auth-page">
+    <header class="auth-topbar">
+      <a class="auth-brand" href="dashboard.html">
+        <img class="auth-brand-image" src="assets/images/artha-logo.png" alt="Artha — Track, Plan, Grow">
+      </a>
+      <p class="auth-top-link">Already have an account? <a href="signin.html">Sign in</a></p>
+    </header>
+
+    <main class="auth-layout">
+      <section class="auth-story" aria-labelledby="story-title">
+        <span class="auth-eyebrow">Make money feel more manageable</span>
+        <h1 id="story-title">Build a better rhythm with <span>your money.</span></h1>
+        <p class="auth-story-copy">Set up a clear picture of where your money goes, what you’re saving for, and the goals you want to reach—without the spreadsheet sprawl.</p>
+
+        <div class="auth-visual" aria-label="Illustrative savings overview">
+          <div class="auth-visual-head">
+            <span class="auth-visual-label">Your money, thoughtfully organised</span>
+            <span class="auth-visual-period">November</span>
+          </div>
+          <div class="auth-balance-row">
+            <strong class="auth-balance">Small steps. Clearer goals.</strong>
+          </div>
+          <svg class="auth-chart" viewBox="0 0 520 112" role="img" aria-label="Decorative savings progress illustration">
+            <defs>
+              <linearGradient id="goal-fill" x1="0" x2="1" y1="0" y2="0">
+                <stop offset="0" stop-color="#00d4c8" stop-opacity=".9"/>
+                <stop offset="1" stop-color="#60a5fa" stop-opacity=".85"/>
+              </linearGradient>
+            </defs>
+            <rect x="0" y="24" width="520" height="13" rx="6.5" fill="currentColor" fill-opacity=".09"/>
+            <rect x="0" y="24" width="354" height="13" rx="6.5" fill="url(#goal-fill)"/>
+            <circle cx="354" cy="30.5" r="9" fill="#00d4c8" stroke="#06231f" stroke-width="4"/>
+            <rect x="0" y="65" width="520" height="13" rx="6.5" fill="currentColor" fill-opacity=".09"/>
+            <rect x="0" y="65" width="244" height="13" rx="6.5" fill="#60a5fa" fill-opacity=".85"/>
+            <circle cx="244" cy="71.5" r="9" fill="#60a5fa" stroke="#06231f" stroke-width="4"/>
+            <text x="0" y="12" fill="currentColor" fill-opacity=".58" font-size="10" font-family="Inter, sans-serif">EMERGENCY FUND · 68%</text>
+            <text x="0" y="105" fill="currentColor" fill-opacity=".58" font-size="10" font-family="Inter, sans-serif">TRAVEL GOAL · 47%</text>
+          </svg>
+          <div class="auth-visual-foot">
+            <span class="auth-legend"><i></i> Progress at your pace</span>
+            <span class="auth-legend"><i></i> Goals that matter</span>
+          </div>
+        </div>
+        <p class="auth-story-note">Designed to make everyday money decisions feel a little clearer.</p>
+      </section>
+
+      <section class="auth-card" aria-labelledby="signup-title">
+        <span class="auth-preview-tag">Visual preview · no account is created</span>
+        <h2 id="signup-title">Create your account</h2>
+        <p class="auth-card-intro">A few details to get your workspace ready.</p>
+
+        <form class="auth-form" id="signup-form">
+          <div class="auth-name-row">
+            <div class="auth-field">
+              <label class="auth-label" for="first-name">First name</label>
+              <input class="auth-input" id="first-name" name="given-name" type="text" autocomplete="given-name" placeholder="Your first name" minlength="2" maxlength="60" required>
+            </div>
+            <div class="auth-field">
+              <label class="auth-label" for="last-name">Last name</label>
+              <input class="auth-input" id="last-name" name="family-name" type="text" autocomplete="family-name" placeholder="Sharma" maxlength="60">
+            </div>
+          </div>
+          <div class="auth-field">
+            <label class="auth-label" for="signup-email">Email address</label>
+            <input class="auth-input" id="signup-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+          </div>
+          <div class="auth-field">
+            <label class="auth-label" for="signup-password">Create password</label>
+            <div class="auth-input-wrap">
+              <input class="auth-input has-toggle" id="signup-password" name="new-password" type="password" autocomplete="new-password" minlength="8" pattern="(?=.*[A-Z])(?=.*[0-9]).{8,}" aria-describedby="password-rules" placeholder="Create a strong password" required>
+              <button class="auth-password-toggle" type="button" data-password-toggle="signup-password" aria-label="Show password" aria-pressed="false">Show</button>
+            </div>
+          </div>
+          <div class="auth-rules" id="password-rules" aria-label="Password requirements">
+            <span>At least 8 characters</span>
+            <span>One uppercase letter</span>
+            <span>One number</span>
+            <span>Use a unique password</span>
+          </div>
+          <div class="auth-field">
+            <label class="auth-label" for="confirm-password">Confirm password</label>
+            <div class="auth-input-wrap">
+              <input class="auth-input has-toggle" id="confirm-password" name="confirm-password" type="password" autocomplete="new-password" minlength="8" placeholder="Re-enter your password" required>
+              <button class="auth-password-toggle" type="button" data-password-toggle="confirm-password" aria-label="Show password" aria-pressed="false">Show</button>
+            </div>
+          </div>
+          <label class="auth-check">
+            <input id="terms" name="terms" type="checkbox" required>
+            <span>I agree to the Terms of Service and Privacy Policy.</span>
+          </label>
+          <p class="auth-form-note" id="signup-note" role="status" aria-live="polite"></p>
+          <button class="auth-submit" type="submit">Create account <span aria-hidden="true">→</span></button>
+        </form>
+
+        <p class="auth-switch">Already registered? <a href="signin.html">Sign in</a></p>
+        <p class="auth-card-footer">This is a visual prototype. Your details are not sent, stored, or used to create an account.</p>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    document.querySelectorAll('[data-password-toggle]').forEach(function(button) {
+      button.addEventListener('click', function() {
+        var input = document.getElementById(button.dataset.passwordToggle);
+        var reveal = input.type === 'password';
+        input.type = reveal ? 'text' : 'password';
+        button.textContent = reveal ? 'Hide' : 'Show';
+        button.setAttribute('aria-label', reveal ? 'Hide password' : 'Show password');
+        button.setAttribute('aria-pressed', String(reveal));
+      });
+    });
+
+    var signupForm = document.getElementById('signup-form');
+    var password = document.getElementById('signup-password');
+    var confirmation = document.getElementById('confirm-password');
+    var signupNote = document.getElementById('signup-note');
+
+    function checkPasswordMatch() {
+      confirmation.setCustomValidity(
+        confirmation.value && confirmation.value !== password.value
+          ? 'Passwords do not match.'
+          : ''
+      );
+    }
+
+    password.addEventListener('input', checkPasswordMatch);
+    confirmation.addEventListener('input', checkPasswordMatch);
+    signupForm.addEventListener('submit', function(event) {
+      event.preventDefault();
+      checkPasswordMatch();
+      if (!signupForm.reportValidity()) return;
+      signupNote.textContent = 'Design preview only — account creation is not connected and no details were saved.';
+      signupNote.classList.add('is-visible');
+    });
+  </script>
+</body>
+</html>
