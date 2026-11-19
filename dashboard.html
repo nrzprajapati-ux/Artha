@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/pft-core.css">
+  <link rel="stylesheet" href="assets/css/auth-scene.css">
   <style>
     /* ── Reset & base ─────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -129,6 +130,8 @@
 
     /* ── App layout ───────────────────────────────────────── */
     .pft-app {
+      position: relative;
+      z-index: 1;
       display: grid;
       grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
       min-height: 100vh;
@@ -1937,7 +1940,7 @@
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
 
 <!-- ══════════════════════════════════════════════════════════
      JAVASCRIPT
@@ -2322,7 +2325,7 @@ function createCardTexture(THREE) {
   context.font = '700 20px Inter, Arial, sans-serif';
   context.fillText('INR  /  EVERYDAY', 56, 493);
   const texture = new THREE.CanvasTexture(surface);
-  texture.encoding = THREE.sRGBEncoding;
+  texture.colorSpace = THREE.SRGBColorSpace;
   return texture;
 }
 
@@ -2354,7 +2357,7 @@ function createCardBackTexture(THREE) {
   context.font = '600 19px Inter, Arial, sans-serif';
   context.fillText('TRACK  ·  PLAN  ·  GROW', 56, 480);
   const texture = new THREE.CanvasTexture(surface);
-  texture.encoding = THREE.sRGBEncoding;
+  texture.colorSpace = THREE.SRGBColorSpace;
   return texture;
 }
 
@@ -2823,5 +2826,6 @@ renderKPIs();
 initThreeScenes();
 navigate('dashboard');
 </script>
+<script src="assets/js/auth-scene.js"></script>
 </body>
 </html>

@@ -1,170 +1,70 @@
-.auth-scene {
-  /* The scene reserves space but never paints an opaque panel behind the canvas. */
-  position: relative;
-  width: 100%;
-  height: clamp(250px, 30vw, 370px);
-  margin: 18px 0 -12px;
-  overflow: visible;
-  pointer-events: none;
-  transform: scale(.96);
-  transition: opacity .9s ease, transform 1.1s cubic-bezier(.2, .7, .2, 1);
-}
-
-.auth-scene.is-loading {
-  opacity: 0;
-  transform: scale(.92);
-}
-
-.auth-scene.is-ready {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.auth-scene-canvas,
-.auth-scene-fallback {
-  position: absolute;
+/* The background stays outside document flow and behind each page's content. */
+.aurora-canvas,
+.aurora-fallback {
+  position: fixed;
   inset: 0;
-  display: block;
   width: 100%;
   height: 100%;
   pointer-events: none;
 }
 
-.auth-scene-canvas {
-  display: none;
+.aurora-canvas {
+  z-index: 0;
+  display: block;
+  opacity: 0;
+  background: transparent;
+  transition: opacity 1.5s ease;
 }
 
-.auth-scene.is-webgl .auth-scene-canvas {
+.aurora-canvas.is-ready {
+  opacity: 1;
+}
+
+.aurora-fallback {
+  z-index: 0;
+  display: none;
+  overflow: hidden;
+  opacity: .68;
+  background:
+    radial-gradient(ellipse 75% 42% at 18% 68%, rgba(0, 71, 65, .42), transparent 72%),
+    radial-gradient(ellipse 78% 40% at 79% 34%, rgba(0, 71, 65, .28), transparent 72%),
+    radial-gradient(ellipse 95% 32% at 53% 83%, rgba(240, 237, 228, .08), transparent 75%);
+  background-size: 140% 140%;
+  animation: aurora-drift 24s ease-in-out infinite alternate;
+}
+
+body.has-aurora-fallback .aurora-fallback {
   display: block;
 }
 
-.auth-scene.is-webgl .auth-scene-fallback {
-  display: none;
+body.aurora-dashboard .aurora-fallback {
+  opacity: .24;
 }
 
-.auth-scene-fallback {
-  overflow: visible;
-  animation: auth-scene-enter .9s cubic-bezier(.2, .7, .2, 1) both;
+html[data-theme="light"] .aurora-fallback {
+  opacity: .76;
+  background:
+    radial-gradient(ellipse 75% 42% at 18% 68%, rgba(0, 71, 65, .17), transparent 72%),
+    radial-gradient(ellipse 78% 40% at 79% 34%, rgba(0, 71, 65, .12), transparent 72%),
+    radial-gradient(ellipse 95% 32% at 53% 83%, rgba(0, 71, 65, .08), transparent 75%);
 }
 
-.scene-orbit {
-  fill: none;
-  stroke: #F0EDE4;
-  stroke-opacity: .3;
-  stroke-width: 1.2;
-  transform-box: fill-box;
-  transform-origin: center;
+html[data-theme="light"] body.aurora-dashboard .aurora-fallback {
+  opacity: .22;
 }
 
-.scene-orbit-one {
-  animation: auth-scene-orbit 34s linear infinite;
+.auth-page,
+.pft-app {
+  position: relative;
+  z-index: 1;
 }
 
-.scene-orbit-two {
-  stroke-opacity: .19;
-  stroke-dasharray: 2 9;
-  animation: auth-scene-orbit 46s linear infinite reverse;
-}
-
-.scene-glow {
-  filter: blur(15px);
-  opacity: .8;
-  animation: auth-scene-glow 6s ease-in-out infinite alternate;
-}
-
-.scene-coin-motion {
-  transform-box: fill-box;
-  transform-origin: center;
-  filter: drop-shadow(0 0 8px rgba(240, 237, 228, .2));
-}
-
-.scene-coin-one {
-  animation: auth-scene-coin 7s ease-in-out infinite;
-}
-
-.scene-coin-two {
-  animation: auth-scene-coin 8.5s 1s ease-in-out infinite reverse;
-}
-
-.scene-coin-three {
-  animation: auth-scene-coin 6.5s .5s ease-in-out infinite;
-}
-
-.scene-particles {
-  opacity: .58;
-  animation: auth-scene-particles 5s ease-in-out infinite alternate;
-}
-
-@keyframes auth-scene-enter {
-  from { opacity: 0; transform: scale(.92); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-@keyframes auth-scene-orbit {
-  to { transform: rotate(360deg); }
-}
-
-@keyframes auth-scene-coin {
-  0%, 100% { transform: translateY(0) rotate(0); }
-  50% { transform: translateY(-10px) rotate(8deg); }
-}
-
-@keyframes auth-scene-glow {
-  to { opacity: .48; }
-}
-
-@keyframes auth-scene-particles {
-  to { opacity: .28; }
-}
-
-@media (max-width: 900px) {
-  .auth-scene {
-    height: clamp(220px, 32vw, 300px);
-    margin: 12px 0 -8px;
-  }
-}
-
-@media (max-width: 767px) {
-  .auth-scene {
-    height: clamp(205px, 58vw, 280px);
-    transform: none;
-    opacity: 1;
-    transition: none;
-  }
-
-  .auth-scene.is-loading {
-    opacity: 1;
-    transform: none;
-  }
-
-  .auth-scene-canvas,
-  .auth-scene.is-webgl .auth-scene-canvas {
-    display: none;
-  }
-
-  .auth-scene-fallback,
-  .auth-scene.is-webgl .auth-scene-fallback {
-    display: block;
-  }
+@keyframes aurora-drift {
+  0% { background-position: 0% 50%; transform: scale(1); }
+  100% { background-position: 100% 50%; transform: scale(1.05); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .auth-scene,
-  .auth-scene.is-loading,
-  .auth-scene.is-ready,
-  .auth-scene-fallback {
-    transform: none;
-    transition: none;
-    animation: none;
-  }
-
-  .scene-orbit-one,
-  .scene-orbit-two,
-  .scene-glow,
-  .scene-coin-one,
-  .scene-coin-two,
-  .scene-coin-three,
-  .scene-particles {
-    animation: none;
-  }
+  .aurora-canvas { transition: none; }
+  .aurora-fallback { animation: none; }
 }

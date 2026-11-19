@@ -27,9 +27,6 @@
         <h1 id="story-title">A calmer way to <span>stay on top</span> of money.</h1>
         <p class="auth-story-copy">Bring your spending, savings, and goals into one clear view. Pick up where you left off and make your next money move with confidence.</p>
 
-        <div class="auth-scene" data-auth-scene aria-hidden="true">
-          <canvas class="auth-scene-canvas"></canvas>
-        </div>
       </section>
 
       <section class="auth-card" aria-labelledby="signin-title">
@@ -63,7 +60,6 @@
     </main>
   </div>
 
-  <script defer src="assets/js/auth-scene.js"></script>
   <script>
     document.querySelectorAll('[data-password-toggle]').forEach(function(button) {
       button.addEventListener('click', function() {
@@ -89,5 +85,6 @@
       signinNote.classList.add('is-visible');
     });
   </script>
+  <script src="assets/js/auth-scene.js"></script>
 </body>
 </html>

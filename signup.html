@@ -27,9 +27,6 @@
         <h1 id="story-title">Build a better rhythm with <span>your money.</span></h1>
         <p class="auth-story-copy">Set up a clear picture of where your money goes, what you’re saving for, and the goals you want to reach—without the spreadsheet sprawl.</p>
 
-        <div class="auth-scene" data-auth-scene aria-hidden="true">
-          <canvas class="auth-scene-canvas"></canvas>
-        </div>
       </section>
 
       <section class="auth-card" aria-labelledby="signup-title">
@@ -86,7 +83,6 @@
     </main>
   </div>
 
-  <script defer src="assets/js/auth-scene.js"></script>
   <script>
     document.querySelectorAll('[data-password-toggle]').forEach(function(button) {
       button.addEventListener('click', function() {
@@ -122,5 +118,6 @@
       signupNote.classList.add('is-visible');
     });
   </script>
+  <script src="assets/js/auth-scene.js"></script>
 </body>
 </html>
